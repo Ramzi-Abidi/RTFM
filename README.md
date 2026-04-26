@@ -2,6 +2,9 @@
 
 An AI-powered documentation assistant built with RAG (Retrieval Augmented Generation). Upload your documentation files, ask questions in natural language, and get accurate answers with source citations — powered entirely by free-tier APIs.
 
+## UI preview (V1)
+<img width="1512" height="844" alt="image" src="https://github.com/user-attachments/assets/0888b0c1-3195-4d73-832e-16b3323b0c4f" />
+
 ## Tech Stack
 
 | Layer | Technology |
