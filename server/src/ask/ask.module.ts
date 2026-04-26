@@ -1,0 +1,14 @@
+import { Module } from '@nestjs/common';
+import { AskController } from './ask.controller';
+import { AskService } from './ask.service';
+import { EmbeddingsModule } from '../embeddings/embeddings.module';
+import { RedisModule } from '../redis/redis.module';
+import { AiModule } from '../ai/ai.module';
+
+@Module({
+  imports: [EmbeddingsModule, RedisModule, AiModule],
+  controllers: [AskController],
+  providers: [AskService],
+  exports: [AskService],
+})
+export class AskModule {}
