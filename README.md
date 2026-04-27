@@ -1,6 +1,6 @@
 # RTFM For Me
 
-An AI-powered documentation assistant built with RAG (Retrieval Augmented Generation). Upload your documentation files, ask questions in natural language, and get accurate answers with source citations — powered entirely by free-tier APIs.
+An AI powered documentation assistant built with RAG (Retrieval Augmented Generation). Upload your documentation files, ask questions in natural language, and get accurate answers with source citations, powered entirely by free-tier APIs.
 
 ## Tech Stack
 
@@ -34,9 +34,9 @@ An AI-powered documentation assistant built with RAG (Retrieval Augmented Genera
 
 ### 1. Get API Keys (All Free)
 
-- [Groq](https://console.groq.com) — LLM (free tier: 14k requests/day)
-- [Jina AI](https://jina.ai/embeddings) — Embeddings (free tier: 1M tokens)
-- [Google AI Studio](https://aistudio.google.com) — Fallback LLM (free tier: 1M tokens/day)
+- [Groq](https://console.groq.com) : LLM (free tier: 14k requests/day)
+- [Jina AI](https://jina.ai/embeddings) : Embeddings (free tier: 1M tokens)
+- [Google AI Studio](https://aistudio.google.com) : Fallback LLM (free tier: 1M tokens/day)
 
 ### 2. Setup Environment
 
