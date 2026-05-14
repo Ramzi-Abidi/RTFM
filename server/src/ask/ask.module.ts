@@ -4,9 +4,10 @@ import { AskService } from './ask.service';
 import { EmbeddingsModule } from '../embeddings/embeddings.module';
 import { RedisModule } from '../redis/redis.module';
 import { AiModule } from '../ai/ai.module';
+import { SessionModule } from '../session/session.module';
 
 @Module({
-  imports: [EmbeddingsModule, RedisModule, AiModule],
+  imports: [EmbeddingsModule, RedisModule, AiModule, SessionModule],
   controllers: [AskController],
   providers: [AskService],
   exports: [AskService],

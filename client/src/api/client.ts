@@ -17,17 +17,30 @@ export interface Document {
   chunks: number;
 }
 
+export interface SessionMetadata {
+  id: string;
+  title: string;
+  lastMessage: string;
+  messageCount: number;
+  createdAt: string;
+}
+
+export interface SessionMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface IngestResponse {
   success: boolean;
   files: { fileName: string; chunks: number }[];
   totalChunks: number;
 }
 
-export async function ask(question: string): Promise<AskResponse> {
+export async function ask(question: string, sessionId: string): Promise<AskResponse> {
   const res = await fetch(`${API_URL}/ask`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, sessionId }),
   });
   if (!res.ok) throw new Error('Failed to get answer');
   return res.json();
@@ -57,4 +70,23 @@ export async function deleteDoc(id: string) {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error('Failed to delete document');
+}
+
+export async function listSessions(): Promise<{ sessions: SessionMetadata[] }> {
+  const res = await fetch(`${API_URL}/sessions`);
+  if (!res.ok) throw new Error('Failed to list sessions');
+  return res.json();
+}
+
+export async function loadSession(id: string): Promise<{ messages: SessionMessage[] }> {
+  const res = await fetch(`${API_URL}/sessions/${id}`);
+  if (!res.ok) throw new Error('Failed to load session');
+  return res.json();
+}
+
+export async function deleteSession(id: string) {
+  const res = await fetch(`${API_URL}/sessions/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete session');
 }

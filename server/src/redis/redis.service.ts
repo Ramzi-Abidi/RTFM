@@ -31,7 +31,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return this.client.ping();
   }
 
-  async hSet(key: string, data: Record<string, string | number | Buffer>): Promise<number> {
+  async hSet(key: string, data: Record<string, string | number | Buffer>) {
     return this.client.hSet(key, data);
   }
 
@@ -43,7 +43,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return this.client.del(key);
   }
 
-  async keys(pattern: string): Promise<string[]> {
+  async keys(pattern: string) {
     return this.client.keys(pattern);
   }
 
