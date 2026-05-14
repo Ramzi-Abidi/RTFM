@@ -25,7 +25,7 @@ An AI powered documentation assistant built with RAG (Retrieval Augmented Genera
 ### Question Answering (RAG)
 1. Embed the user question via Jina AI (`retrieval.query` task)
 2. Check semantic cache (`idx:cache`) for a similar previously answered question
-3. If cache miss — run KNN vector search to find top 5 relevant chunks
+3. If cache miss, run KNN vector search to find top 5 relevant chunks
 4. Build prompt with retrieved context and send to Groq LLM
 5. Return answer with source file citations
 6. Cache Q&A pair for future similar questions

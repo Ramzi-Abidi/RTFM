@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Upload, FileText, X, Loader2 } from 'lucide-react';
-import { ask, uploadDocs, listDocs, deleteDoc, Document, Source } from './api/client';
+import { Send, Upload, FileText, X, Loader2, MessageSquarePlus, MessageSquare, Trash2 } from 'lucide-react';
+import { ask, uploadDocs, listDocs, deleteDoc, listSessions, loadSession, deleteSession, Document, Source, SessionMetadata, SessionMessage } from './api/client';
 import { Toaster } from '@/components/ui/toast';
 import { useToast } from '@/hooks/useToast';
 
@@ -17,12 +17,61 @@ export default function App() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [uploading, setUploading] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [sessionId, setSessionId] = useState<string>('');
+  const [sessions, setSessions] = useState<SessionMetadata[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toasts, toast, dismiss } = useToast();
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlSessionId = urlParams.get('session');
+    
+    if (urlSessionId) {
+      setSessionId(urlSessionId);
+      localStorage.setItem('sessionId', urlSessionId);
+    } else {
+      const stored = localStorage.getItem('sessionId');
+      if (stored) {
+        setSessionId(stored);
+        updateUrl(stored);
+      } else {
+        const newId = crypto.randomUUID();
+        localStorage.setItem('sessionId', newId);
+        setSessionId(newId);
+        updateUrl(newId);
+      }
+    }
+  }, []);
+
+  const updateUrl = (id: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('session', id);
+    window.history.pushState({ sessionId: id }, '', url.toString());
+  };
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state?.sessionId) {
+        const session = sessions.find(s => s.id === event.state.sessionId);
+        if (session) {
+          switchToSession(session);
+        }
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [sessions]);
+
+  useEffect(() => {
     loadDocuments();
+    loadSessions();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(loadSessions, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -40,16 +89,62 @@ export default function App() {
     }
   };
 
+  const loadSessions = async () => {
+    try {
+      const data = await listSessions();
+      setSessions(data.sessions);
+    } catch (e) {
+      console.error('Failed to load sessions', e);
+      toast({ title: 'Error', description: 'Failed to load sessions', variant: 'destructive' });
+    }
+  };
+
+  const switchToSession = async (session: SessionMetadata) => {
+    try {
+      const data = await loadSession(session.id);
+      const messages: Message[] = data.messages.map((msg: SessionMessage) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+      setSessionId(session.id);
+      setMessages(messages);
+      localStorage.setItem('sessionId', session.id);
+      updateUrl(session.id);
+    } catch (e) {
+      console.error('Failed to load session', e);
+      toast({ title: 'Error', description: 'Failed to load session', variant: 'destructive' });
+    }
+  };
+
+  const handleDeleteSession = async (id: string) => {
+    try {
+      await deleteSession(id);
+      await loadSessions();
+      if (sessionId === id) {
+        const newId = crypto.randomUUID();
+        localStorage.setItem('sessionId', newId);
+        setSessionId(newId);
+        setMessages([]);
+        updateUrl(newId);
+      }
+      toast({ title: 'Deleted', description: 'Session removed', variant: 'success' });
+    } catch (e) {
+      console.error('Failed to delete session', e);
+      toast({ title: 'Error', description: 'Failed to delete session', variant: 'destructive' });
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
     const question = input.trim();
     setInput('');
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
     setMessages((prev) => [...prev, { role: 'user', content: question }]);
     setLoading(true);
 
     try {
-      const response = await ask(question);
+      const response = await ask(question, sessionId);
       setMessages((prev) => [
         ...prev,
         { role: 'assistant', content: response.answer, sources: response.sources },
@@ -97,15 +192,23 @@ export default function App() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   };
 
+  const resizeTextarea = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Left Sidebar - Documents */}
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
           <h2 className="font-semibold text-gray-700">Documents</h2>
@@ -151,8 +254,22 @@ export default function App() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="h-14 border-b border-gray-200 bg-white flex items-center px-6">
+        <div className="h-14 border-b border-gray-200 bg-white flex items-center justify-between px-6">
           <h1 className="text-xl font-bold text-gray-800">RTFM For Me</h1>
+          <button
+            onClick={() => {
+              const newId = crypto.randomUUID();
+              localStorage.setItem('sessionId', newId);
+              setSessionId(newId);
+              setMessages([]);
+              updateUrl(newId);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition"
+            title="Start new conversation"
+          >
+            <MessageSquarePlus size={18} />
+            New Chat
+          </button>
         </div>
 
         {/* Messages */}
@@ -222,23 +339,28 @@ export default function App() {
 
         {/* Input */}
         <div className="border-t border-gray-200 bg-white p-4">
-          <div className="max-w-3xl mx-auto flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask a question..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={loading}
-            />
-            <button
-              onClick={handleSend}
-              disabled={loading || !input.trim()}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              <Send size={20} />
-            </button>
+          <div className="max-w-3xl mx-auto">
+            <div className="relative flex items-end border border-gray-300 rounded-xl focus-within:ring-2 focus-within:ring-blue-500 bg-white">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => { setInput(e.target.value); resizeTextarea(); }}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask a question..."
+                rows={1}
+                className="flex-1 resize-none px-4 py-3 bg-transparent focus:outline-none text-gray-800 placeholder-gray-400"
+                style={{ maxHeight: '200px' }}
+                disabled={loading}
+              />
+              <button
+                onClick={handleSend}
+                disabled={loading || !input.trim()}
+                className="m-2 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
+              >
+                <Send size={18} />
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 mt-1 ml-1">Enter to send · Shift+Enter for new line</p>
           </div>
         </div>
       </div>
@@ -281,6 +403,60 @@ export default function App() {
           </div>
         </div>
       ) : null}
+
+      {/* Right Sidebar - Chats */}
+      <div className="w-64 bg-white border-l border-gray-200 flex flex-col">
+        <div className="p-4 border-b border-gray-200">
+          <h2 className="font-semibold text-gray-700">Chats</h2>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {sessions.length === 0 ? (
+            <p className="text-gray-400 text-sm text-center p-4">No chats yet</p>
+          ) : (
+            <ul className="p-2 space-y-1">
+              {sessions.map((session) => (
+                <li
+                  key={session.id}
+                  className={`group p-3 rounded-lg cursor-pointer transition-colors ${
+                    sessionId === session.id
+                      ? 'bg-blue-50 border border-blue-200'
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => switchToSession(session)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare size={16} className="text-gray-400 flex-shrink-0" />
+                        <h3 className="text-sm font-medium text-gray-900 truncate">
+                          {session.title}
+                        </h3>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1 truncate">
+                        {session.lastMessage}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {session.messageCount} messages
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSession(session.id);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity flex-shrink-0 ml-2"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
       <Toaster toasts={toasts} onClose={dismiss} />
     </div>
   );
