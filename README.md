@@ -16,19 +16,19 @@ An AI powered documentation assistant built with RAG (Retrieval Augmented Genera
 ## How It Works
 
 ### Ingestion
-1. Upload `.md` or `.txt` documentation files
-2. Split content into chunks by markdown headers and word count
-3. Generate 1024-dim embeddings via Jina AI
-4. Store chunks + embeddings in Redis vector index (`idx:docs`)
-5. Deduplicate via SHA-256 content hash
+1. upload `.md` or `.txt` documentation files
+2. split content into chunks by markdown headers and word count
+3. generate 1024-dim embeddings via Jina AI
+4. store chunks + embeddings in Redis vector index (`idx:docs`)
+5. deduplicate via SHA-256 content hash
 
 ### Question Answering (RAG)
-1. Embed the user question via Jina AI (`retrieval.query` task)
-2. Check semantic cache (`idx:cache`) for a similar previously answered question
-3. If cache miss, run KNN vector search to find top 5 relevant chunks
-4. Build prompt with retrieved context and send to Groq LLM
-5. Return answer with source file citations
-6. Cache Q&A pair for future similar questions
+1. embed the user question via Jina AI (`retrieval.query` task)
+2. check semantic cache (`idx:cache`) for a similar previously answered question
+3. if cache miss, run KNN vector search to find top 5 relevant chunks
+4. build prompt with retrieved context and send to Groq LLM
+5. return answer with source file citations
+6. cache Q&A pair for future similar questions
 
 ## Quick Start
 
