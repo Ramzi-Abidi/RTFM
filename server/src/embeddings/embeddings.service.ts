@@ -59,7 +59,7 @@ export class EmbeddingsService {
         input: [text],
       }),
     });
-    console.log("response",response);
+
     if (!response.ok) {
       throw new Error(`Jina API error: ${response.statusText}`);
     }
