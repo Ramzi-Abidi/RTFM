@@ -1,4 +1,4 @@
-# RTFM For Me
+# RTFM
 
 An AI powered documentation assistant built with RAG (Retrieval Augmented Generation). Upload your documentation files, ask questions in natural language, and get accurate answers with source citations, powered entirely by free-tier APIs.
 
