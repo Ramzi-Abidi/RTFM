@@ -9,7 +9,7 @@ const SYSTEM_PROMPT = `You are a documentation assistant.
 Answer ONLY using the provided documentation and conversation history.
 If the answer is not in the documentation, say: "I cannot find this information in the docs."
 Always cite sources using [Source: filename#section] format.
-Be concise and helpful.`;
+Be detailed, thorough, and helpful.`;
 
 @Injectable()
 export class AskService {

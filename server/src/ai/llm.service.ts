@@ -33,11 +33,11 @@ export class LlmService {
     }
   }
 
-  private async completeWithGroq(prompt: string): Promise<string> {
+  private async completeWithGroq(prompt: string) {
     const response = await this.groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'user', content: prompt }],
-      max_tokens: 1024,
+      max_tokens: 2048,
       temperature: 0.7,
     });
     console.log("response", response.choices[0]);

@@ -30,7 +30,7 @@ export class ChunkerService {
     return chunks;
   }
 
-  private splitBySections(content: string): { title: string; content: string }[] {
+  private splitBySections(content: string) {
     const lines = content.split('\n');
     const sections: { title: string; content: string }[] = [];
     let currentSection = { title: 'Introduction', content: '' };
@@ -54,7 +54,7 @@ export class ChunkerService {
     return sections;
   }
 
-  private splitSection(content: string, section: string): string[] {
+  private splitSection(content: string, section: string) {
     const words = content.split(/\s+/);
     const chunks: string[] = [];
 

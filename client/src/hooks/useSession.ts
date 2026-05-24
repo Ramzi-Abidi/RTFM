@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { listSessions, loadSession, deleteSession, SessionMetadata, SessionMessage } from '../api/client';
 import { useToast } from './useToast';
 
@@ -11,55 +12,26 @@ export interface Message {
 export function useSession(
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
 ) {
-  const [sessionId, setSessionId] = useState<string>('');
+  const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
+  const navigate = useNavigate();
+  const [sessionId, setSessionId] = useState<string>(urlSessionId || '');
   const [sessions, setSessions] = useState<SessionMetadata[]>([]);
   const { toast } = useToast();
 
-  const updateUrl = (id: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('session', id);
-    window.history.pushState({ sessionId: id }, '', url.toString());
-  };
-
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlSessionId = urlParams.get('session');
-
     if (urlSessionId) {
       setSessionId(urlSessionId);
       localStorage.setItem('sessionId', urlSessionId);
-    } else {
-      const stored = localStorage.getItem('sessionId');
-      if (stored) {
-        setSessionId(stored);
-        updateUrl(stored);
-      } else {
-        const newId = crypto.randomUUID();
-        localStorage.setItem('sessionId', newId);
-        setSessionId(newId);
-        updateUrl(newId);
-      }
     }
-  }, []);
+  }, [urlSessionId]);
 
   useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      if (event.state?.sessionId) {
-        const session = sessions.find(s => s.id === event.state.sessionId);
-        if (session) switchToSession(session);
-      }
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [sessions]);
-
-  useEffect(() => {
-    loadSessions();
-    const interval = setInterval(loadSessions, 30000);
+    loadSessionsData();
+    const interval = setInterval(loadSessionsData, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const loadSessions = async () => {
+  const loadSessionsData = async () => {
     try {
       const data = await listSessions();
       setSessions(data.sessions);
@@ -79,7 +51,7 @@ export function useSession(
       setSessionId(session.id);
       setMessages(msgs);
       localStorage.setItem('sessionId', session.id);
-      updateUrl(session.id);
+      navigate(`/${session.id}`);
     } catch (e) {
       console.error('Failed to load session', e);
       toast({ title: 'Error', description: 'Failed to load session', variant: 'destructive' });
@@ -91,13 +63,13 @@ export function useSession(
     localStorage.setItem('sessionId', newId);
     setSessionId(newId);
     setMessages([]);
-    updateUrl(newId);
+    navigate(`/${newId}`);
   };
 
   const handleDeleteSession = async (id: string) => {
     try {
       await deleteSession(id);
-      await loadSessions();
+      await loadSessionsData();
       if (sessionId === id) {
         createNewSession();
       }
@@ -114,6 +86,6 @@ export function useSession(
     switchToSession,
     handleDeleteSession,
     createNewSession,
-    loadSessions,
+    loadSessionsData,
   };
 }
