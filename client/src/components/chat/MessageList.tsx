@@ -45,7 +45,7 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
           />
         ))}
 
-        {loading && (
+        {loading ? (
           <div className="bg-white border border-gray-200 p-4 rounded-lg max-w-2xl">
             <p className="text-sm font-medium mb-1">Bot</p>
             <div className="flex items-center gap-2 text-gray-400">
@@ -53,7 +53,7 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
               Thinking...
             </div>
           </div>
-        )}
+        ): null}
 
         <div ref={messagesEndRef} />
       </div>
