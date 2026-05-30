@@ -1,3 +1,5 @@
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Source } from '../../api/client';
 
 interface MessageBubbleProps {
@@ -19,7 +21,15 @@ export function MessageBubble({ role, content, sources }: MessageBubbleProps) {
         <p className="text-sm font-medium mb-1">
           {role === 'user' ? 'You' : 'Bot'}
         </p>
-        <p className="whitespace-pre-wrap">{content}</p>
+        {role === 'user' ? (
+          <p className="whitespace-pre-wrap">{content}</p>
+        ) : (
+          <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-pre:my-2 prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {content}
+            </ReactMarkdown>
+          </div>
+        )}
       </div>
 
       {sources && sources.length > 0 && (
