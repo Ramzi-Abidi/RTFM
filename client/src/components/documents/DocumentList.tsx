@@ -17,7 +17,7 @@ export function DocumentList({ documents, onUploadClick, onDelete }: DocumentLis
       <div className="p-4">
         <button
           onClick={onUploadClick}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#edf3fe] text-gray-800 rounded-lg hover:bg-[#dce8fc] transition"
         >
           <Upload size={18} />
           Upload

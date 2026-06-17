@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { EmbeddingsService } from '../embeddings/embeddings.service';
-import { VectorIndexService } from '../redis/vector-index.service';
-import { LlmService } from '../ai/llm.service';
-import { SessionService } from '../session/session.service';
-import { AskResponse, Source } from '../types';
+import { Injectable } from "@nestjs/common";
+import { EmbeddingsService } from "../embeddings/embeddings.service";
+import { VectorIndexService } from "../redis/vector-index.service";
+import { LlmService } from "../ai/llm.service";
+import { SessionService } from "../session/session.service";
+import { AskResponse, Source } from "../types";
 
 const SYSTEM_PROMPT = `You are a documentation assistant.
 Answer ONLY using the provided documentation and conversation history.
@@ -33,23 +33,27 @@ export class AskService {
    * @throws Error if question is empty
    */
   async ask(question: string, sessionId?: string): Promise<AskResponse> {
-    if (!question || question.trim() === '') {
-      throw new Error('Question is required');
+    if (!question || question.trim() === "") {
+      throw new Error("Question is required");
     }
 
     // Load conversation history if session exists
-    let conversationHistory = '';
+    let conversationHistory = "";
     if (sessionId) {
       const history = await this.sessionService.getHistory(sessionId);
       if (history.length > 0) {
         conversationHistory = history
-          .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
-          .join('\n');
+          .map(
+            (msg) =>
+              `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`,
+          )
+          .join("\n");
       }
     }
 
     const questionEmbedding = await this.embeddingsService.embedQuery(question);
 
+    // handles the semantic caching for avoiding redundant AI calls
     const cachedResponse = await this.vectorIndexService.searchCache(
       questionEmbedding,
       0.95,
@@ -57,8 +61,12 @@ export class AskService {
     if (cachedResponse) {
       // Still save to session even if cached
       if (sessionId) {
-        await this.sessionService.addMessage(sessionId, 'user', question);
-        await this.sessionService.addMessage(sessionId, 'assistant', cachedResponse.answer);
+        await this.sessionService.addMessage(sessionId, "user", question);
+        await this.sessionService.addMessage(
+          sessionId,
+          "assistant",
+          cachedResponse.answer,
+        );
       }
 
       return {
@@ -67,16 +75,22 @@ export class AskService {
       };
     }
 
+    // Retrieve relevant chunks, find the 5 most similar document chunks
     const relevantChunks = await this.vectorIndexService.searchSimilar(
       questionEmbedding,
       5,
     );
 
     if (relevantChunks.length === 0) {
-      const noDocsAnswer = 'I cannot find any relevant information in the docs. Please upload documentation first.';
+      const noDocsAnswer =
+        "I cannot find any relevant information in the docs. Please upload documentation first.";
       if (sessionId) {
-        await this.sessionService.addMessage(sessionId, 'user', question);
-        await this.sessionService.addMessage(sessionId, 'assistant', noDocsAnswer);
+        await this.sessionService.addMessage(sessionId, "user", question);
+        await this.sessionService.addMessage(
+          sessionId,
+          "assistant",
+          noDocsAnswer,
+        );
       }
       return {
         answer: noDocsAnswer,
@@ -86,25 +100,32 @@ export class AskService {
 
     const context = relevantChunks
       .map((chunk) => `[${chunk.fileName}#${chunk.section}]\n${chunk.content}`)
-      .join('\n\n---\n\n');
+      .join("\n\n---\n\n");
 
     // Build prompt with conversation history if available
     let prompt = SYSTEM_PROMPT;
-    
+
     if (conversationHistory) {
       prompt += `\n\nConversation so far:\n${conversationHistory}`;
     }
-    
+
     prompt += `\n\nDocumentation:\n${context}\n\nQuestion: ${question}\n\nAnswer:`;
+
+    // LLM call, build prompt with chunks + conversation history → answer
     const answer = await this.llmService.complete(prompt);
 
     // Save to session
     if (sessionId) {
-      await this.sessionService.addMessage(sessionId, 'user', question);
-      await this.sessionService.addMessage(sessionId, 'assistant', answer);
+      await this.sessionService.addMessage(sessionId, "user", question);
+      await this.sessionService.addMessage(sessionId, "assistant", answer);
     }
 
-    await this.vectorIndexService.storeCache(question, answer, questionEmbedding);
+    // cache the result for the next time.
+    await this.vectorIndexService.storeCache(
+      question,
+      answer,
+      questionEmbedding,
+    );
 
     const sources: Source[] = relevantChunks.map((chunk) => ({
       fileName: chunk.fileName,
