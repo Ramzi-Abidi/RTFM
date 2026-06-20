@@ -14,13 +14,10 @@ export function MessageBubble({ role, content, sources }: MessageBubbleProps) {
       <div
         className={`p-4 rounded-lg ${
           role === 'user'
-            ? 'bg-blue-500 text-white ml-auto max-w-md'
+            ? 'bg-[#edf3fe] text-gray-800 ml-auto max-w-md'
             : 'bg-white border border-gray-200 max-w-2xl'
         }`}
       >
-        <p className="text-sm font-medium mb-1">
-          {role === 'user' ? 'You' : 'Bot'}
-        </p>
         {role === 'user' ? (
           <p className="whitespace-pre-wrap">{content}</p>
         ) : (
@@ -32,7 +29,7 @@ export function MessageBubble({ role, content, sources }: MessageBubbleProps) {
         )}
       </div>
 
-      {sources && sources.length > 0 && (
+      {(sources && sources.length > 0) ? (
         <div className="mt-2 flex flex-wrap gap-2">
           {sources.map((src, j) => (
             <span
@@ -44,7 +41,7 @@ export function MessageBubble({ role, content, sources }: MessageBubbleProps) {
             </span>
           ))}
         </div>
-      )}
+      ): null}
     </div>
   );
 }
