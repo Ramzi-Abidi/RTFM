@@ -17,6 +17,13 @@ export interface Document {
   chunks: number;
 }
 
+export interface DocumentDetail {
+  id: string;
+  fileName: string;
+  content: string;
+  chunks: number;
+}
+
 export interface SessionMetadata {
   id: string;
   title: string;
@@ -62,6 +69,15 @@ export async function uploadDocs(files: FileList): Promise<IngestResponse> {
 export async function listDocs(): Promise<{ documents: Document[] }> {
   const res = await fetch(`${API_URL}/documents`);
   if (!res.ok) throw new Error('Failed to list documents');
+  return res.json();
+}
+
+export async function getDocument(id: string): Promise<DocumentDetail> {
+  const res = await fetch(`${API_URL}/documents/${id}`);
+  if (!res.ok) {
+    const error = await res.json().catch(() => null);
+    throw new Error(error?.message || 'Failed to load document');
+  }
   return res.json();
 }
 

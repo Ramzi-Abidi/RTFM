@@ -1,10 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { VectorIndexService } from '../redis/vector-index.service';
 import { RedisService } from '../redis/redis.service';
 
 export interface DocumentInfo {
   id: string;
   fileName: string;
+  chunks: number;
+}
+
+export interface DocumentDetail {
+  id: string;
+  fileName: string;
+  content: string;
   chunks: number;
 }
 
@@ -33,6 +40,34 @@ export class DocumentsService {
     }
     console.log('documents from redis', documents);
     return { documents };
+  }
+
+  /**
+   * Retrieves a single document with its full text content for preview.
+   * @param fileId - The hash ID of the document
+   * @returns Document metadata and full content
+   * @throws NotFoundException if document or preview content is missing
+   */
+  async getDocument(fileId: string): Promise<DocumentDetail> {
+    const fileKey = `file:${fileId}`;
+    const data = await this.redisService.hGetAll(fileKey);
+
+    if (!data.fileName) {
+      throw new NotFoundException('Document not found');
+    }
+
+    if (!data.content) {
+      throw new NotFoundException(
+        'Preview not available for this document. Re-upload it to enable preview.',
+      );
+    }
+
+    return {
+      id: fileId,
+      fileName: data.fileName,
+      content: data.content,
+      chunks: parseInt(data.chunks, 10),
+    };
   }
 
   /**

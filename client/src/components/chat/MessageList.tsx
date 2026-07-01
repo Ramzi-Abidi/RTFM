@@ -17,7 +17,7 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
   }, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-auto p-6">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6">
       {(messages.length === 0 && !hasDocuments) ? (
         <div className="h-full flex items-center justify-center">
           <div className="text-center text-gray-400">
@@ -46,7 +46,7 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
         ))}
 
         {loading ? (
-          <div className="bg-white border border-gray-200 p-4 rounded-lg max-w-2xl">
+          <div className="bg-white border border-gray-200 p-4 rounded-lg max-w-full sm:max-w-2xl">
             <div className="flex items-center gap-2 text-gray-400">
               <Loader2 size={16} className="animate-spin" />
               Thinking...

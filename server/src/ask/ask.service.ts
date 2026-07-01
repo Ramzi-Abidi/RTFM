@@ -6,10 +6,78 @@ import { SessionService } from "../session/session.service";
 import { AskResponse, Source } from "../types";
 
 const SYSTEM_PROMPT = `You are a documentation assistant.
-Answer ONLY using the provided documentation and conversation history.
-If the answer is not in the documentation, say: "I cannot find this information in the docs."
-Always cite sources using [Source: filename#section] format.
+Answer factual questions using ONLY the provided documentation and conversation history.
+If the answer is not supported by the documentation, say clearly that you could not find it in the uploaded docs and suggest rephrasing or uploading more documentation.
+Always cite sources using [Source: filename#section] format when using doc content.
 Be detailed, thorough, and helpful.`;
+
+const CONVERSATIONAL_PROMPT = `You are RTFM, a friendly documentation assistant.
+
+The user is greeting you or making casual conversation — not asking a documentation question yet.
+
+Respond naturally, warmly, and briefly. You may use light personality.
+Invite them to ask questions about their uploaded documentation.
+If they have not uploaded docs yet, mention they can upload .md or .txt files to get started.
+
+Do NOT say "I cannot find this information in the docs" for greetings or small talk.
+Do NOT invent documentation content.`;
+
+function isConversationalMessage(text: string) {
+  const normalized = text.trim().toLowerCase().replace(/[!?.…]+$/g, "");
+
+  const exactMatches = new Set([
+    "hi",
+    "hey",
+    "hello",
+    "yo",
+    "sup",
+    "howdy",
+    "thanks",
+    "thank you",
+    "thx",
+    "ty",
+    "help",
+    "who are you",
+    "what can you do",
+    "good morning",
+    "good afternoon",
+    "good evening",
+  ]);
+
+  if (exactMatches.has(normalized)) {
+    return true;
+  }
+
+  if (
+    /^(hi|hey|hello|thanks|thank you)\b/.test(normalized) &&
+    normalized.split(/\s+/).length <= 4
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function buildConversationalPrompt(
+  conversationHistory: string,
+  question: string,
+): string {
+  let prompt = CONVERSATIONAL_PROMPT;
+
+  if (conversationHistory) {
+    prompt += `
+
+Conversation so far:
+${conversationHistory}`;
+  }
+
+  prompt += `
+
+User: ${question}
+
+Answer:`;
+  return prompt;
+}
 
 @Injectable()
 export class AskService {
@@ -37,18 +105,19 @@ export class AskService {
       throw new Error("Question is required");
     }
 
-    // Load conversation history if session exists
-    let conversationHistory = "";
-    if (sessionId) {
-      const history = await this.sessionService.getHistory(sessionId);
-      if (history.length > 0) {
-        conversationHistory = history
-          .map(
-            (msg) =>
-              `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`,
-          )
-          .join("\n");
+    const conversationHistory = await this.loadConversationHistory(sessionId);
+
+    if (isConversationalMessage(question)) {
+      const answer = await this.llmService.complete(
+        buildConversationalPrompt(conversationHistory, question),
+      );
+
+      if (sessionId) {
+        await this.sessionService.addMessage(sessionId, "user", question);
+        await this.sessionService.addMessage(sessionId, "assistant", answer);
       }
+
+      return { answer, sources: [] };
     }
 
     const questionEmbedding = await this.embeddingsService.embedQuery(question);
@@ -99,17 +168,34 @@ export class AskService {
     }
 
     const context = relevantChunks
-      .map((chunk) => `[${chunk.fileName}#${chunk.section}]\n${chunk.content}`)
-      .join("\n\n---\n\n");
+      .map(
+        (chunk) => `[${chunk.fileName}#${chunk.section}]
+${chunk.content}`,
+      )
+      .join(`
+
+---
+
+`);
 
     // Build prompt with conversation history if available
     let prompt = SYSTEM_PROMPT;
 
     if (conversationHistory) {
-      prompt += `\n\nConversation so far:\n${conversationHistory}`;
+      prompt += `
+
+Conversation so far:
+${conversationHistory}`;
     }
 
-    prompt += `\n\nDocumentation:\n${context}\n\nQuestion: ${question}\n\nAnswer:`;
+    prompt += `
+
+Documentation:
+${context}
+
+Question: ${question}
+
+Answer:`;
 
     // LLM call, build prompt with chunks + conversation history → answer
     const answer = await this.llmService.complete(prompt);
@@ -133,5 +219,24 @@ export class AskService {
       score: chunk.score,
     }));
     return { answer, sources };
+  }
+
+  private async loadConversationHistory(sessionId?: string): Promise<string> {
+    if (!sessionId) {
+      return "";
+    }
+
+    const history = await this.sessionService.getHistory(sessionId);
+    if (history.length === 0) {
+      return "";
+    }
+
+    return history
+      .map(
+        (msg) =>
+          `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`,
+      )
+      .join(`
+`);
   }
 }

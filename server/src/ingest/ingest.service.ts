@@ -93,6 +93,7 @@ export class IngestService {
 
     await this.redisService.hSet(fileKey, {
       fileName,
+      content,
       chunks: chunks.length.toString(),
       createdAt: new Date().toISOString(),
     });
@@ -100,7 +101,7 @@ export class IngestService {
     return { fileName, chunks: chunks.length };
   }
 
-  private hashContent(content: string): string {
+  private hashContent(content: string) {
     return createHash('sha256').update(content).digest('hex').slice(0, 16);
   }
 }

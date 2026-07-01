@@ -1,19 +1,36 @@
 import { MessageSquare, Trash2 } from 'lucide-react';
 import { SessionMetadata } from '../../api/client';
+import { cn } from '@/lib/utils';
 
 interface ChatListProps {
   sessions: SessionMetadata[];
   activeSessionId: string;
   onSwitch: (session: SessionMetadata) => void;
   onDelete: (id: string) => void;
+  className?: string;
+  showHeader?: boolean;
 }
 
-export function ChatList({ sessions, activeSessionId, onSwitch, onDelete }: ChatListProps) {
+export function ChatList({
+  sessions,
+  activeSessionId,
+  onSwitch,
+  onDelete,
+  className,
+  showHeader = true,
+}: ChatListProps) {
   return (
-    <div className="w-64 bg-white border-l border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="font-semibold text-gray-700">Chats</h2>
-      </div>
+    <div
+      className={cn(
+        'w-64 shrink-0 bg-white border-l border-gray-200 flex flex-col h-full',
+        className,
+      )}
+    >
+      {showHeader ? (
+        <div className="hidden lg:block p-4 border-b border-gray-200">
+          <h2 className="font-semibold text-gray-700">Chats</h2>
+        </div>
+      ) : null}
 
       <div className="flex-1 overflow-y-auto">
         {sessions.length === 0 ? (
@@ -50,7 +67,7 @@ export function ChatList({ sessions, activeSessionId, onSwitch, onDelete }: Chat
                       e.stopPropagation();
                       onDelete(session.id);
                     }}
-                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity flex-shrink-0 ml-2"
+                    className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity flex-shrink-0 ml-2 p-1 -m-1"
                   >
                     <Trash2 size={14} />
                   </button>
