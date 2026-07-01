@@ -10,6 +10,11 @@ export class DocumentsController {
     return this.documentsService.listDocuments();
   }
 
+  @Get(':id')
+  async get(@Param('id') id: string) {
+    return this.documentsService.getDocument(id);
+  }
+
   @Delete(':id')
   async delete(@Param('id') id: string) {
     return this.documentsService.deleteDocument(id);

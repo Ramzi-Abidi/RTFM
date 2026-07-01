@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ask, uploadDocs, listDocs, deleteDoc, Document } from './api/client';
+import { useState, useEffect, useCallback } from 'react';
+import { ask, uploadDocs, listDocs, deleteDoc, Document, SessionMetadata } from './api/client';
 import { Toaster } from '@/components/ui/toast';
 import { useToast } from '@/hooks/useToast';
 import { useSession, Message } from './hooks/useSession';
@@ -7,6 +7,10 @@ import { DocumentList } from './components/documents/DocumentList';
 import { ChatArea } from './components/chat/ChatArea';
 import { ChatList } from './components/chat/ChatList';
 import { UploadModal } from './components/modals/UploadModal';
+import { DocumentPreviewModal } from './components/modals/DocumentPreviewModal';
+import { MobileDrawer } from './components/layout/MobileDrawer';
+
+type MobilePanel = 'docs' | 'chats' | null;
 
 export default function App() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -15,7 +19,11 @@ export default function App() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [uploading, setUploading] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>(null);
   const { toasts, toast, dismiss } = useToast();
+  const closePreview = useCallback(() => setPreviewDocument(null), []);
+  const closeMobilePanel = useCallback(() => setMobilePanel(null), []);
 
   const { sessionId, sessions, switchToSession, handleDeleteSession, createNewSession } =
     useSession(setMessages);
@@ -84,6 +92,9 @@ export default function App() {
     try {
       await deleteDoc(id);
       await loadDocuments();
+      if (previewDocument?.id === id) {
+        closePreview();
+      }
       toast({ title: 'Deleted', description: 'Document removed', variant: 'success' });
     } catch (e) {
       console.error('Failed to delete', e);
@@ -91,12 +102,28 @@ export default function App() {
     }
   };
 
+  const handlePreview = (doc: Document) => {
+    setPreviewDocument(doc);
+    closeMobilePanel();
+  };
+
+  const handleSwitchSession = (session: SessionMetadata) => {
+    switchToSession(session);
+    closeMobilePanel();
+  };
+
+  const documentListProps = {
+    documents,
+    onUploadClick: () => setShowUpload(true),
+    onPreview: handlePreview,
+    onDelete: handleDeleteDoc,
+  };
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-[100dvh] overflow-hidden bg-gray-50">
       <DocumentList
-        documents={documents}
-        onUploadClick={() => setShowUpload(true)}
-        onDelete={handleDeleteDoc}
+        {...documentListProps}
+        className="hidden lg:flex"
       />
 
       <ChatArea
@@ -107,7 +134,42 @@ export default function App() {
         onInputChange={setInput}
         onSend={handleSend}
         onNewChat={createNewSession}
+        onOpenDocs={() => setMobilePanel('docs')}
+        onOpenChats={() => setMobilePanel('chats')}
       />
+
+      <ChatList
+        sessions={sessions}
+        activeSessionId={sessionId}
+        onSwitch={handleSwitchSession}
+        onDelete={handleDeleteSession}
+        className="hidden lg:flex"
+      />
+
+      <MobileDrawer
+        open={mobilePanel === 'docs'}
+        onClose={closeMobilePanel}
+        side="left"
+        title="Documents"
+      >
+        <DocumentList {...documentListProps} className="w-full border-r-0" showHeader={false} />
+      </MobileDrawer>
+
+      <MobileDrawer
+        open={mobilePanel === 'chats'}
+        onClose={closeMobilePanel}
+        side="right"
+        title="Chats"
+      >
+        <ChatList
+          sessions={sessions}
+          activeSessionId={sessionId}
+          onSwitch={handleSwitchSession}
+          onDelete={handleDeleteSession}
+          className="w-full border-l-0"
+          showHeader={false}
+        />
+      </MobileDrawer>
 
       <UploadModal
         show={showUpload}
@@ -116,11 +178,10 @@ export default function App() {
         onUpload={handleUpload}
       />
 
-      <ChatList
-        sessions={sessions}
-        activeSessionId={sessionId}
-        onSwitch={switchToSession}
-        onDelete={handleDeleteSession}
+      <DocumentPreviewModal
+        document={previewDocument}
+        onClose={closePreview}
+        toast={toast}
       />
 
       <Toaster toasts={toasts} onClose={dismiss} />

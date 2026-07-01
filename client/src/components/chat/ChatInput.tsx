@@ -36,7 +36,7 @@ export function ChatInput({ input, loading, onInputChange, onSend }: ChatInputPr
   };
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
+    <div className="border-t border-gray-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="max-w-3xl mx-auto">
         <div className="relative flex items-end border border-gray-300 rounded-xl focus-within:ring-2 focus-within:ring-blue-500 bg-white">
           <textarea
@@ -53,7 +53,7 @@ export function ChatInput({ input, loading, onInputChange, onSend }: ChatInputPr
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
-            className="m-2 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
+            className="m-2 p-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
           >
             <Send size={18} />
           </button>

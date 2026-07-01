@@ -1,23 +1,41 @@
 import { Upload, FileText, X } from 'lucide-react';
 import { Document } from '../../api/client';
+import { cn } from '@/lib/utils';
 
 interface DocumentListProps {
   documents: Document[];
   onUploadClick: () => void;
+  onPreview: (doc: Document) => void;
   onDelete: (id: string) => void;
+  className?: string;
+  showHeader?: boolean;
 }
 
-export function DocumentList({ documents, onUploadClick, onDelete }: DocumentListProps) {
+export function DocumentList({
+  documents,
+  onUploadClick,
+  onPreview,
+  onDelete,
+  className,
+  showHeader = true,
+}: DocumentListProps) {
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="font-semibold text-gray-700">Documents</h2>
-      </div>
+    <div
+      className={cn(
+        'w-64 shrink-0 bg-white border-r border-gray-200 flex flex-col h-full',
+        className,
+      )}
+    >
+      {showHeader ? (
+        <div className="hidden lg:block p-4 border-b border-gray-200">
+          <h2 className="font-semibold text-gray-700">Documents</h2>
+        </div>
+      ) : null}
 
       <div className="p-4">
         <button
           onClick={onUploadClick}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#edf3fe] text-gray-800 rounded-lg hover:bg-[#dce8fc] transition"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#edf3fe] text-gray-800 rounded-lg hover:bg-[#dce8fc] transition"
         >
           <Upload size={18} />
           Upload
@@ -32,15 +50,21 @@ export function DocumentList({ documents, onUploadClick, onDelete }: DocumentLis
             {documents.map((doc) => (
               <li
                 key={doc.id}
-                className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
               >
-                <div className="flex items-center gap-2 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => onPreview(doc)}
+                  className="flex items-center gap-2 min-w-0 flex-1 text-left"
+                >
                   <FileText size={16} className="text-gray-400 flex-shrink-0" />
                   <span className="text-sm text-gray-700 truncate">{doc.fileName}</span>
-                </div>
+                </button>
                 <button
+                  type="button"
                   onClick={() => onDelete(doc.id)}
-                  className="text-gray-400 hover:text-red-500 flex-shrink-0"
+                  className="text-gray-400 hover:text-red-500 flex-shrink-0 p-2 -m-1"
+                  aria-label={`Delete ${doc.fileName}`}
                 >
                   <X size={16} />
                 </button>
