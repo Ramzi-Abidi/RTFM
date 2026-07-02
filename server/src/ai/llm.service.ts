@@ -40,7 +40,7 @@ export class LlmService {
       max_tokens: 2048,
       temperature: 0.7,
     });
-    console.log("response", response.choices[0]);
+    console.log('response', response.choices[0]);
     return response.choices[0]?.message?.content || '';
   }
 

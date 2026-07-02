@@ -4,18 +4,19 @@ An AI powered documentation assistant built with RAG (Retrieval Augmented Genera
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Backend** | NestJS (TypeScript) |
-| **Frontend** | React + Vite + TailwindCSS |
-| **Vector DB / Cache / Storage** | Redis Stack |
-| **LLM** | Groq (`llama-3.3-70b-versatile`) with Google AI (Gemini) fallback |
-| **Embeddings** | Jina AI (`jina-embeddings-v3`, 1024 dimensions) |
-| **Package Manager** | pnpm |
+| Layer                           | Technology                                                        |
+| ------------------------------- | ----------------------------------------------------------------- |
+| **Backend**                     | NestJS (TypeScript)                                               |
+| **Frontend**                    | React + Vite + TailwindCSS                                        |
+| **Vector DB / Cache / Storage** | Redis Stack                                                       |
+| **LLM**                         | Groq (`llama-3.3-70b-versatile`) with Google AI (Gemini) fallback |
+| **Embeddings**                  | Jina AI (`jina-embeddings-v3`, 1024 dimensions)                   |
+| **Package Manager**             | pnpm                                                              |
 
 ## How It Works
 
 ### Ingestion
+
 1. upload `.md` or `.txt` documentation files
 2. split content into chunks by markdown headers and word count
 3. generate 1024-dim embeddings via Jina AI
@@ -23,6 +24,7 @@ An AI powered documentation assistant built with RAG (Retrieval Augmented Genera
 5. deduplicate via SHA-256 content hash
 
 ### Question Answering (RAG)
+
 1. embed the user question via Jina AI (`retrieval.query` task)
 2. check semantic cache (`idx:cache`) for a similar previously answered question
 3. if cache miss, run KNN vector search to find top 5 relevant chunks
@@ -72,24 +74,25 @@ App runs at `http://localhost:5173`, backend at `http://localhost:3000`.
 
 ## API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/ingest` | POST | Upload documentation files (multipart) |
-| `/api/ask` | POST | Ask a question `{ question: string }` |
-| `/api/documents` | GET | List all uploaded documents |
-| `/api/documents/:id` | DELETE | Delete a document and its chunks |
+| Endpoint             | Method | Description                            |
+| -------------------- | ------ | -------------------------------------- |
+| `/api/ingest`        | POST   | Upload documentation files (multipart) |
+| `/api/ask`           | POST   | Ask a question `{ question: string }`  |
+| `/api/documents`     | GET    | List all uploaded documents            |
+| `/api/documents/:id` | DELETE | Delete a document and its chunks       |
 
 ## Redis Data Model
 
-| Key Pattern | Type | Description |
-|-------------|------|-------------|
-| `file:<hash>` | Hash | Document metadata (fileName, chunks, createdAt) |
-| `doc:<hash>:<i>` | Hash | Document chunk with embedding vector |
-| `cache:<id>` | Hash | Cached Q&A pair with embedding vector |
-| `idx:docs` | Index | Vector index for document chunk search |
-| `idx:cache` | Index | Vector index for semantic cache lookup |
+| Key Pattern      | Type  | Description                                     |
+| ---------------- | ----- | ----------------------------------------------- |
+| `file:<hash>`    | Hash  | Document metadata (fileName, chunks, createdAt) |
+| `doc:<hash>:<i>` | Hash  | Document chunk with embedding vector            |
+| `cache:<id>`     | Hash  | Cached Q&A pair with embedding vector           |
+| `idx:docs`       | Index | Vector index for document chunk search          |
+| `idx:cache`      | Index | Vector index for semantic cache lookup          |
 
 ## UI preview (V1)
+
 <img width="1512" height="844" alt="image" src="https://github.com/user-attachments/assets/0888b0c1-3195-4d73-832e-16b3323b0c4f" />
 
 ## License

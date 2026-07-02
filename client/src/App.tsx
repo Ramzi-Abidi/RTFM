@@ -56,7 +56,7 @@ export default function App() {
         ...prev,
         { role: 'assistant', content: response.answer, sources: response.sources },
       ]);
-    } catch (e) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' },

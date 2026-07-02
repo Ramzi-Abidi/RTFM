@@ -52,10 +52,7 @@ export class IngestService {
    * @returns Object with fileName and number of chunks created
    * @throws Error if file was already ingested (duplicate detection via content hash)
    */
-  private async ingestFile(
-    fileName: string,
-    content: string,
-  ) {
+  private async ingestFile(fileName: string, content: string) {
     const fileHash = this.hashContent(content);
     const fileKey = `file:${fileHash}`;
 
@@ -68,11 +65,9 @@ export class IngestService {
     const chunks = this.chunkerService.chunk(content, fileName);
 
     // call Jina ai to convert the chunks to vector [0.5, 0.6, 0.7, ...]
-    const embeddings = await this.embeddingsService.embed(
-      chunks.map((c) => c.content),
-    );
+    const embeddings = await this.embeddingsService.embed(chunks.map((c) => c.content));
 
-    console.log("embeddings", embeddings);
+    console.log('embeddings', embeddings);
 
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];

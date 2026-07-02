@@ -25,24 +25,19 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
             <p>Upload your docs to get started</p>
           </div>
         </div>
-      ): null}
+      ) : null}
 
-      {(messages.length === 0 && hasDocuments) ? (
+      {messages.length === 0 && hasDocuments ? (
         <div className="h-full flex items-center justify-center">
           <div className="text-center text-gray-400">
             <p>Ask a question about your docs</p>
           </div>
         </div>
-      ): null}
+      ) : null}
 
       <div className="space-y-4 max-w-3xl mx-auto">
         {messages.map((msg, i) => (
-          <MessageBubble
-            key={i}
-            role={msg.role}
-            content={msg.content}
-            sources={msg.sources}
-          />
+          <MessageBubble key={i} role={msg.role} content={msg.content} sources={msg.sources} />
         ))}
 
         {loading ? (
@@ -52,7 +47,7 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
               Thinking...
             </div>
           </div>
-        ): null}
+        ) : null}
 
         <div ref={messagesEndRef} />
       </div>

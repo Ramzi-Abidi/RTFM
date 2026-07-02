@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Post,
-  UseInterceptors,
-  UploadedFiles,
-} from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { IngestService } from './ingest.service';
 import { IngestResponse } from '../types';
@@ -14,9 +9,7 @@ export class IngestController {
 
   @Post()
   @UseInterceptors(FilesInterceptor('files'))
-  async ingest(
-    @UploadedFiles() files: Express.Multer.File[],
-  ): Promise<IngestResponse> {
+  async ingest(@UploadedFiles() files: Express.Multer.File[]): Promise<IngestResponse> {
     return this.ingestService.ingestFiles(files);
   }
 }

@@ -68,18 +68,9 @@ export function ChatArea({
         </div>
       </div>
 
-      <MessageList
-        messages={messages}
-        loading={loading}
-        hasDocuments={hasDocuments}
-      />
+      <MessageList messages={messages} loading={loading} hasDocuments={hasDocuments} />
 
-      <ChatInput
-        input={input}
-        loading={loading}
-        onInputChange={onInputChange}
-        onSend={onSend}
-      />
+      <ChatInput input={input} loading={loading} onInputChange={onInputChange} onSend={onSend} />
     </div>
   );
 }

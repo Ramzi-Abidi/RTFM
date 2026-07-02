@@ -29,19 +29,16 @@ export function MessageBubble({ role, content, sources }: MessageBubbleProps) {
         )}
       </div>
 
-      {(sources && sources.length > 0) ? (
+      {sources && sources.length > 0 ? (
         <div className="mt-2 flex flex-wrap gap-2">
           {sources.map((src, j) => (
-            <span
-              key={j}
-              className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
-            >
+            <span key={j} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
               {src.fileName}
               {src.section && `#${src.section}`}
             </span>
           ))}
         </div>
-      ): null}
+      ) : null}
     </div>
   );
 }

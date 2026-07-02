@@ -15,7 +15,7 @@ export function useToast() {
       const id = Math.random().toString(36).slice(2);
       setToasts((prev) => [...prev, { id, title, description, variant }]);
     },
-    []
+    [],
   );
 
   const dismiss = useCallback((id: string) => {
