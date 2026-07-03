@@ -105,15 +105,19 @@ export class AskService {
       throw new Error('Question is required');
     }
 
-    // Load conversation history if session exists
-    let conversationHistory = '';
-    if (sessionId) {
-      const history = await this.sessionService.getHistory(sessionId);
-      if (history.length > 0) {
-        conversationHistory = history
-          .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
-          .join('\n');
+    const conversationHistory = await this.loadConversationHistory(sessionId);
+
+    if (isConversationalMessage(question)) {
+      const answer = await this.llmService.complete(
+        buildConversationalPrompt(conversationHistory, question),
+      );
+
+      if (sessionId) {
+        await this.sessionService.addMessage(sessionId, 'user', question);
+        await this.sessionService.addMessage(sessionId, 'assistant', answer);
       }
+
+      return { answer, sources: [] };
     }
 
     const questionEmbedding = await this.embeddingsService.embedQuery(question);
@@ -192,7 +196,7 @@ Answer:`;
     return { answer, sources };
   }
 
-  private async loadConversationHistory(sessionId?: string) {
+  private async loadConversationHistory(sessionId?: string): Promise<string> {
     if (!sessionId) {
       return '';
     }
@@ -202,8 +206,8 @@ Answer:`;
       return '';
     }
 
-    return history.map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
-      .join(`
-`);
+    return history
+      .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+      .join('\n');
   }
 }
