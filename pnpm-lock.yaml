@@ -6,9 +6,6 @@ settings:
 
 importers:
 
-<<<<<<< HEAD
-  .: {}
-=======
   .:
     devDependencies:
       prettier:
@@ -25,4 +22,3 @@ packages:
 snapshots:
 
   prettier@3.9.4: {}
->>>>>>> 9de1bd6 (chore: enhance project configuration and code quality)
