@@ -40,9 +40,7 @@ export function ChatArea({
           </button>
         ) : null}
 
-        <h1 className="flex-1 truncate text-lg sm:text-xl font-bold text-gray-800">
-          RTFM For Me
-        </h1>
+        <h1 className="flex-1 truncate text-lg sm:text-xl font-bold text-gray-800">RTFM For Me</h1>
 
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {onOpenChats ? (

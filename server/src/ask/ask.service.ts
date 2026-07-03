@@ -23,25 +23,28 @@ Do NOT say "I cannot find this information in the docs" for greetings or small t
 Do NOT invent documentation content.`;
 
 function isConversationalMessage(text: string) {
-  const normalized = text.trim().toLowerCase().replace(/[!?.…]+$/g, "");
+  const normalized = text
+    .trim()
+    .toLowerCase()
+    .replace(/[!?.…]+$/g, '');
 
   const exactMatches = new Set([
-    "hi",
-    "hey",
-    "hello",
-    "yo",
-    "sup",
-    "howdy",
-    "thanks",
-    "thank you",
-    "thx",
-    "ty",
-    "help",
-    "who are you",
-    "what can you do",
-    "good morning",
-    "good afternoon",
-    "good evening",
+    'hi',
+    'hey',
+    'hello',
+    'yo',
+    'sup',
+    'howdy',
+    'thanks',
+    'thank you',
+    'thx',
+    'ty',
+    'help',
+    'who are you',
+    'what can you do',
+    'good morning',
+    'good afternoon',
+    'good evening',
   ]);
 
   if (exactMatches.has(normalized)) {
@@ -58,10 +61,7 @@ function isConversationalMessage(text: string) {
   return false;
 }
 
-function buildConversationalPrompt(
-  conversationHistory: string,
-  question: string,
-): string {
+function buildConversationalPrompt(conversationHistory: string, question: string): string {
   let prompt = CONVERSATIONAL_PROMPT;
 
   if (conversationHistory) {
@@ -106,16 +106,13 @@ export class AskService {
     }
 
     // Load conversation history if session exists
-    let conversationHistory = "";
+    let conversationHistory = '';
     if (sessionId) {
       const history = await this.sessionService.getHistory(sessionId);
       if (history.length > 0) {
         conversationHistory = history
-          .map(
-            (msg) =>
-              `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`,
-          )
-          .join("\n");
+          .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+          .join('\n');
       }
     }
 
@@ -154,7 +151,7 @@ export class AskService {
 
     const context = relevantChunks
       .map((chunk) => `[${chunk.fileName}#${chunk.section}]\n${chunk.content}`)
-      .join("\n\n---\n\n");
+      .join('\n\n---\n\n');
 
     // Build prompt with conversation history if available
     let prompt = SYSTEM_PROMPT;
@@ -195,21 +192,17 @@ Answer:`;
     return { answer, sources };
   }
 
-  private async loadConversationHistory(sessionId?: string): Promise<string> {
+  private async loadConversationHistory(sessionId?: string) {
     if (!sessionId) {
-      return "";
+      return '';
     }
 
     const history = await this.sessionService.getHistory(sessionId);
     if (history.length === 0) {
-      return "";
+      return '';
     }
 
-    return history
-      .map(
-        (msg) =>
-          `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`,
-      )
+    return history.map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
       .join(`
 `);
   }

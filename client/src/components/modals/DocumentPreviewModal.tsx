@@ -72,12 +72,8 @@ export function DocumentPreviewModal({ document, onClose, toast }: DocumentPrevi
       >
         <div className="flex items-center justify-between gap-4 p-4 border-b border-gray-200">
           <div className="min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900 truncate">
-              {document.fileName}
-            </h3>
-            {detail ? (
-              <p className="text-sm text-gray-500">{detail.chunks} chunks</p>
-            ) : null}
+            <h3 className="text-lg font-semibold text-gray-900 truncate">{document.fileName}</h3>
+            {detail ? <p className="text-sm text-gray-500">{detail.chunks} chunks</p> : null}
           </div>
           <button
             onClick={onClose}
@@ -99,9 +95,7 @@ export function DocumentPreviewModal({ document, onClose, toast }: DocumentPrevi
           {detail && !loading ? (
             isMarkdownFile(detail.fileName) ? (
               <div className="prose prose-sm max-w-none prose-p:my-2 prose-headings:my-3 prose-ul:my-2 prose-ol:my-2 prose-pre:my-3 prose-pre:bg-gray-50 prose-pre:text-gray-800 prose-pre:border prose-pre:border-gray-200 prose-pre:rounded-lg prose-pre:shadow-none prose-pre:[&_code]:bg-transparent prose-pre:[&_code]:p-0 prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {detail.content}
-                </ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{detail.content}</ReactMarkdown>
               </div>
             ) : (
               <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans">

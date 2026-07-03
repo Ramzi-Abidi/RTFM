@@ -121,10 +121,7 @@ export default function App() {
 
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-gray-50">
-      <DocumentList
-        {...documentListProps}
-        className="hidden lg:flex"
-      />
+      <DocumentList {...documentListProps} className="hidden lg:flex" />
 
       <ChatArea
         messages={messages}
@@ -178,11 +175,7 @@ export default function App() {
         onUpload={handleUpload}
       />
 
-      <DocumentPreviewModal
-        document={previewDocument}
-        onClose={closePreview}
-        toast={toast}
-      />
+      <DocumentPreviewModal document={previewDocument} onClose={closePreview} toast={toast} />
 
       <Toaster toasts={toasts} onClose={dismiss} />
     </div>

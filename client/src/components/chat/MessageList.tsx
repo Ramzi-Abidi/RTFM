@@ -18,7 +18,7 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
 
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-      {(messages.length === 0 && !hasDocuments) ? (
+      {messages.length === 0 && !hasDocuments ? (
         <div className="h-full flex items-center justify-center">
           <div className="text-center text-gray-400">
             <FileText size={48} className="mx-auto mb-4" />
