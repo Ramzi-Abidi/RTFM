@@ -27,7 +27,7 @@ export class SessionController {
    * Deletes a session and all its messages
    */
   @Delete(':id')
-  async delete(@Param('id') id: string){
+  async delete(@Param('id') id: string) {
     await this.sessionService.clearSession(id);
     return { success: true };
   }

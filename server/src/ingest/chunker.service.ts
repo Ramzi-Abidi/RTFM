@@ -11,7 +11,7 @@ export class ChunkerService {
   private maxChunkSize = 500;
   private overlap = 50;
 
-  chunk(content: string, fileName: string): Chunk[] {
+  chunk(content: string, _fileName: string): Chunk[] {
     const sections = this.splitBySections(content);
     const chunks: Chunk[] = [];
     let chunkIndex = 0;
@@ -54,7 +54,7 @@ export class ChunkerService {
     return sections;
   }
 
-  private splitSection(content: string, section: string) {
+  private splitSection(content: string, _section: string) {
     const words = content.split(/\s+/);
     const chunks: string[] = [];
 

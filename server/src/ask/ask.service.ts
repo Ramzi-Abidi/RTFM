@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import { EmbeddingsService } from "../embeddings/embeddings.service";
-import { VectorIndexService } from "../redis/vector-index.service";
-import { LlmService } from "../ai/llm.service";
-import { SessionService } from "../session/session.service";
-import { AskResponse, Source } from "../types";
+import { Injectable } from '@nestjs/common';
+import { EmbeddingsService } from '../embeddings/embeddings.service';
+import { VectorIndexService } from '../redis/vector-index.service';
+import { LlmService } from '../ai/llm.service';
+import { SessionService } from '../session/session.service';
+import { AskResponse, Source } from '../types';
 
 const SYSTEM_PROMPT = `You are a documentation assistant.
 Answer factual questions using ONLY the provided documentation and conversation history.
@@ -23,25 +23,28 @@ Do NOT say "I cannot find this information in the docs" for greetings or small t
 Do NOT invent documentation content.`;
 
 function isConversationalMessage(text: string) {
-  const normalized = text.trim().toLowerCase().replace(/[!?.…]+$/g, "");
+  const normalized = text
+    .trim()
+    .toLowerCase()
+    .replace(/[!?.…]+$/g, '');
 
   const exactMatches = new Set([
-    "hi",
-    "hey",
-    "hello",
-    "yo",
-    "sup",
-    "howdy",
-    "thanks",
-    "thank you",
-    "thx",
-    "ty",
-    "help",
-    "who are you",
-    "what can you do",
-    "good morning",
-    "good afternoon",
-    "good evening",
+    'hi',
+    'hey',
+    'hello',
+    'yo',
+    'sup',
+    'howdy',
+    'thanks',
+    'thank you',
+    'thx',
+    'ty',
+    'help',
+    'who are you',
+    'what can you do',
+    'good morning',
+    'good afternoon',
+    'good evening',
   ]);
 
   if (exactMatches.has(normalized)) {
@@ -58,10 +61,7 @@ function isConversationalMessage(text: string) {
   return false;
 }
 
-function buildConversationalPrompt(
-  conversationHistory: string,
-  question: string,
-): string {
+function buildConversationalPrompt(conversationHistory: string, question: string): string {
   let prompt = CONVERSATIONAL_PROMPT;
 
   if (conversationHistory) {
@@ -101,8 +101,8 @@ export class AskService {
    * @throws Error if question is empty
    */
   async ask(question: string, sessionId?: string): Promise<AskResponse> {
-    if (!question || question.trim() === "") {
-      throw new Error("Question is required");
+    if (!question || question.trim() === '') {
+      throw new Error('Question is required');
     }
 
     const conversationHistory = await this.loadConversationHistory(sessionId);
@@ -113,8 +113,8 @@ export class AskService {
       );
 
       if (sessionId) {
-        await this.sessionService.addMessage(sessionId, "user", question);
-        await this.sessionService.addMessage(sessionId, "assistant", answer);
+        await this.sessionService.addMessage(sessionId, 'user', question);
+        await this.sessionService.addMessage(sessionId, 'assistant', answer);
       }
 
       return { answer, sources: [] };
@@ -123,19 +123,12 @@ export class AskService {
     const questionEmbedding = await this.embeddingsService.embedQuery(question);
 
     // handles the semantic caching for avoiding redundant AI calls
-    const cachedResponse = await this.vectorIndexService.searchCache(
-      questionEmbedding,
-      0.95,
-    );
+    const cachedResponse = await this.vectorIndexService.searchCache(questionEmbedding, 0.95);
     if (cachedResponse) {
       // Still save to session even if cached
       if (sessionId) {
-        await this.sessionService.addMessage(sessionId, "user", question);
-        await this.sessionService.addMessage(
-          sessionId,
-          "assistant",
-          cachedResponse.answer,
-        );
+        await this.sessionService.addMessage(sessionId, 'user', question);
+        await this.sessionService.addMessage(sessionId, 'assistant', cachedResponse.answer);
       }
 
       return {
@@ -145,21 +138,14 @@ export class AskService {
     }
 
     // Retrieve relevant chunks, find the 5 most similar document chunks
-    const relevantChunks = await this.vectorIndexService.searchSimilar(
-      questionEmbedding,
-      5,
-    );
+    const relevantChunks = await this.vectorIndexService.searchSimilar(questionEmbedding, 5);
 
     if (relevantChunks.length === 0) {
       const noDocsAnswer =
-        "I cannot find any relevant information in the docs. Please upload documentation first.";
+        'I cannot find any relevant information in the docs. Please upload documentation first.';
       if (sessionId) {
-        await this.sessionService.addMessage(sessionId, "user", question);
-        await this.sessionService.addMessage(
-          sessionId,
-          "assistant",
-          noDocsAnswer,
-        );
+        await this.sessionService.addMessage(sessionId, 'user', question);
+        await this.sessionService.addMessage(sessionId, 'assistant', noDocsAnswer);
       }
       return {
         answer: noDocsAnswer,
@@ -168,15 +154,8 @@ export class AskService {
     }
 
     const context = relevantChunks
-      .map(
-        (chunk) => `[${chunk.fileName}#${chunk.section}]
-${chunk.content}`,
-      )
-      .join(`
-
----
-
-`);
+      .map((chunk) => `[${chunk.fileName}#${chunk.section}]\n${chunk.content}`)
+      .join('\n\n---\n\n');
 
     // Build prompt with conversation history if available
     let prompt = SYSTEM_PROMPT;
@@ -202,16 +181,12 @@ Answer:`;
 
     // Save to session
     if (sessionId) {
-      await this.sessionService.addMessage(sessionId, "user", question);
-      await this.sessionService.addMessage(sessionId, "assistant", answer);
+      await this.sessionService.addMessage(sessionId, 'user', question);
+      await this.sessionService.addMessage(sessionId, 'assistant', answer);
     }
 
     // cache the result for the next time.
-    await this.vectorIndexService.storeCache(
-      question,
-      answer,
-      questionEmbedding,
-    );
+    await this.vectorIndexService.storeCache(question, answer, questionEmbedding);
 
     const sources: Source[] = relevantChunks.map((chunk) => ({
       fileName: chunk.fileName,
@@ -223,20 +198,16 @@ Answer:`;
 
   private async loadConversationHistory(sessionId?: string): Promise<string> {
     if (!sessionId) {
-      return "";
+      return '';
     }
 
     const history = await this.sessionService.getHistory(sessionId);
     if (history.length === 0) {
-      return "";
+      return '';
     }
 
     return history
-      .map(
-        (msg) =>
-          `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`,
-      )
-      .join(`
-`);
+      .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+      .join('\n');
   }
 }

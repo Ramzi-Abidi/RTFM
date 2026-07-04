@@ -12,5 +12,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<Navigate to={`/${crypto.randomUUID()}`} replace />} />
       </Routes>
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

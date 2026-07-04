@@ -7,6 +7,20 @@ const EMBEDDING_DIM = 1024;
 const DOC_INDEX = 'idx:docs';
 const CACHE_INDEX = 'idx:cache';
 
+interface SimilarChunk {
+  id: string;
+  content: string;
+  fileName: string;
+  section: string;
+  score: number;
+}
+
+interface CachedAnswer {
+  question: string;
+  answer: string;
+  score: number;
+}
+
 @Injectable()
 export class VectorIndexService implements OnModuleInit {
   constructor(private redisService: RedisService) {}
@@ -34,11 +48,12 @@ export class VectorIndexService implements OnModuleInit {
           section: { type: SchemaFieldTypes.TAG },
           chunkIndex: { type: SchemaFieldTypes.NUMERIC },
         },
-        { ON: 'HASH', PREFIX: 'doc:' }
+        { ON: 'HASH', PREFIX: 'doc:' },
       );
       console.log('Created docs vector index');
-    } catch (e: any) {
-      if (e.message?.includes('Index already exists')) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      if (message.includes('Index already exists')) {
         console.log('Docs index already exists');
       } else {
         console.error('Error creating docs index:', e);
@@ -59,11 +74,12 @@ export class VectorIndexService implements OnModuleInit {
           },
           answer: { type: SchemaFieldTypes.TEXT },
         },
-        { ON: 'HASH', PREFIX: 'cache:' }
+        { ON: 'HASH', PREFIX: 'cache:' },
       );
       console.log('Created cache vector index');
-    } catch (e: any) {
-      if (e.message?.includes('Index already exists')) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      if (message.includes('Index already exists')) {
         console.log('Cache index already exists');
       } else {
         console.error('Error creating cache index:', e);
@@ -94,27 +110,23 @@ export class VectorIndexService implements OnModuleInit {
    * @param topK - Number of most similar results to return (default: 5)
    * @returns Array of matching chunks with content, fileName, section, and similarity score
    */
-  async searchSimilar(embedding: number[], topK: number = 5): Promise<any[]> {
+  async searchSimilar(embedding: number[], topK: number = 5): Promise<SimilarChunk[]> {
     const client = this.redisService.getClient();
     const embeddingBuffer = Buffer.from(new Float32Array(embedding).buffer);
 
-    const results = await client.ft.search(
-      DOC_INDEX,
-      `*=>[KNN ${topK} @embedding $vec AS score]`,
-      {
-        PARAMS: { vec: embeddingBuffer },
-        RETURN: ['content', 'fileName', 'section', 'score'],
-        SORTBY: { BY: 'score' },
-        DIALECT: 2,
-      }
-    );
+    const results = await client.ft.search(DOC_INDEX, `*=>[KNN ${topK} @embedding $vec AS score]`, {
+      PARAMS: { vec: embeddingBuffer },
+      RETURN: ['content', 'fileName', 'section', 'score'],
+      SORTBY: { BY: 'score' },
+      DIALECT: 2,
+    });
 
     return results.documents.map((doc) => ({
       id: doc.id,
-      content: doc.value.content,
-      fileName: doc.value.fileName,
-      section: doc.value.section,
-      score: parseFloat(doc.value.score as string),
+      content: String(doc.value.content ?? ''),
+      fileName: String(doc.value.fileName ?? ''),
+      section: String(doc.value.section ?? ''),
+      score: parseFloat(String(doc.value.score ?? '0')),
     }));
   }
 
@@ -124,27 +136,23 @@ export class VectorIndexService implements OnModuleInit {
    * @param threshold - Minimum similarity score to consider a cache hit (default: 0.95)
    * @returns Cached question/answer if similarity >= threshold, null otherwise
    */
-  async searchCache(embedding: number[], threshold: number = 0.95): Promise<any | null> {
+  async searchCache(embedding: number[], threshold: number = 0.95): Promise<CachedAnswer | null> {
     const client = this.redisService.getClient();
     const embeddingBuffer = Buffer.from(new Float32Array(embedding).buffer);
 
-    const results = await client.ft.search(
-      CACHE_INDEX,
-      `*=>[KNN 1 @embedding $vec AS score]`,
-      {
-        PARAMS: { vec: embeddingBuffer },
-        RETURN: ['question', 'answer', 'score'],
-        DIALECT: 2,
-      }
-    );
+    const results = await client.ft.search(CACHE_INDEX, `*=>[KNN 1 @embedding $vec AS score]`, {
+      PARAMS: { vec: embeddingBuffer },
+      RETURN: ['question', 'answer', 'score'],
+      DIALECT: 2,
+    });
 
     if (results.documents.length > 0) {
       const doc = results.documents[0];
-      const score = 1 - parseFloat(doc.value.score as string);
+      const score = 1 - parseFloat(String(doc.value.score ?? '0'));
       if (score >= threshold) {
         return {
-          question: doc.value.question,
-          answer: doc.value.answer,
+          question: String(doc.value.question ?? ''),
+          answer: String(doc.value.answer ?? ''),
           score,
         };
       }
@@ -186,7 +194,7 @@ export class VectorIndexService implements OnModuleInit {
     return deleted;
   }
 
-  async getDocumentChunks(fileName: string) {
+  async getDocumentChunks(_fileName: string) {
     return this.redisService.keys(`doc:*`);
   }
 }

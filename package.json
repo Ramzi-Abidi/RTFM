@@ -6,9 +6,21 @@
   "scripts": {
     "dev:server": "cd server && pnpm run start:dev",
     "dev:client": "cd client && pnpm run dev",
+    "build": "pnpm run build:client && pnpm run build:server",
     "build:server": "cd server && pnpm run build",
     "build:client": "cd client && pnpm run build",
+    "lint": "pnpm run lint:client && pnpm run lint:server",
+    "lint:client": "cd client && pnpm run lint",
+    "lint:server": "cd server && pnpm run lint",
+    "typecheck": "pnpm run typecheck:client && pnpm run typecheck:server",
+    "typecheck:client": "cd client && pnpm run typecheck",
+    "typecheck:server": "cd server && pnpm run typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "docker:up": "docker compose -f docker/docker-compose.yml up -d",
     "docker:down": "docker compose -f docker/docker-compose.yml down"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.4"
   }
 }

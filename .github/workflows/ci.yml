@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            client/pnpm-lock.yaml
+            server/pnpm-lock.yaml
+
+      - name: Install root dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install client dependencies
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+
+      - name: Install server dependencies
+        working-directory: server
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+  lint-and-typecheck:
+    name: Lint and Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            client/pnpm-lock.yaml
+            server/pnpm-lock.yaml
+
+      - name: Install root dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install client dependencies
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+
+      - name: Install server dependencies
+        working-directory: server
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            client/pnpm-lock.yaml
+            server/pnpm-lock.yaml
+
+      - name: Install root dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install client dependencies
+        working-directory: client
+        run: pnpm install --frozen-lockfile
+
+      - name: Install server dependencies
+        working-directory: server
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+  all-checks-pass:
+    name: All checks passed
+    runs-on: ubuntu-latest
+    needs: [format, lint-and-typecheck, build]
+    steps:
+      - run: echo "All checks passed"

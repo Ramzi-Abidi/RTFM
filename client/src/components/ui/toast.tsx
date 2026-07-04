@@ -24,7 +24,7 @@ export function Toast({ id, title, description, variant = 'default', onClose }: 
           'bg-white border-gray-200': variant === 'default',
           'bg-green-50 border-green-200': variant === 'success',
           'bg-red-50 border-red-200': variant === 'destructive',
-        }
+        },
       )}
     >
       <div className="flex-1">

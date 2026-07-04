@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { listSessions, loadSession, deleteSession, SessionMetadata, SessionMessage } from '../api/client';
+import {
+  listSessions,
+  loadSession,
+  deleteSession,
+  SessionMetadata,
+  SessionMessage,
+} from '../api/client';
 import { useToast } from './useToast';
 
 export interface Message {
@@ -9,9 +15,7 @@ export interface Message {
   sources?: { fileName: string; section: string; score?: number }[];
 }
 
-export function useSession(
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
-) {
+export function useSession(setMessages: React.Dispatch<React.SetStateAction<Message[]>>) {
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const [sessionId, setSessionId] = useState<string>(urlSessionId || '');

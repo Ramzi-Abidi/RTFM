@@ -55,12 +55,8 @@ export function ChatList({
                         {session.title}
                       </h3>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1 truncate">
-                      {session.lastMessage}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {session.messageCount} messages
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1 truncate">{session.lastMessage}</p>
+                    <p className="text-xs text-gray-400 mt-1">{session.messageCount} messages</p>
                   </div>
                   <button
                     onClick={(e) => {
