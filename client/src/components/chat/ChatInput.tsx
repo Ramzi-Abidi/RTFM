@@ -36,9 +36,9 @@ export function ChatInput({ input, loading, onInputChange, onSend }: ChatInputPr
   };
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="max-w-3xl mx-auto">
-        <div className="relative flex items-end border border-gray-300 rounded-xl focus-within:ring-2 focus-within:ring-blue-500 bg-white">
+        <div className="relative flex items-end border border-gray-300 dark:border-gray-700 rounded-xl focus-within:ring-2 focus-within:ring-blue-500 bg-white dark:bg-gray-900">
           <textarea
             ref={textareaRef}
             value={input}
@@ -46,7 +46,7 @@ export function ChatInput({ input, loading, onInputChange, onSend }: ChatInputPr
             onKeyDown={handleKeyDown}
             placeholder="Ask a question..."
             rows={1}
-            className="flex-1 resize-none px-4 py-3 bg-transparent focus:outline-none text-gray-800 placeholder-gray-400"
+            className="flex-1 resize-none px-4 py-3 bg-transparent focus:outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             style={{ maxHeight: '200px' }}
             disabled={loading}
           />
@@ -58,7 +58,9 @@ export function ChatInput({ input, loading, onInputChange, onSend }: ChatInputPr
             <Send size={18} />
           </button>
         </div>
-        <p className="text-xs text-gray-400 mt-1 ml-1">Enter to send · Shift+Enter for new line</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 ml-1">
+          Enter to send · Shift+Enter for new line
+        </p>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { ask, uploadDocs, listDocs, deleteDoc, Document, SessionMetadata } from 
 import { Toaster } from '@/components/ui/toast';
 import { useToast } from '@/hooks/useToast';
 import { useSession, Message } from './hooks/useSession';
+import { useTheme } from './hooks/useTheme';
 import { DocumentList } from './components/documents/DocumentList';
 import { ChatArea } from './components/chat/ChatArea';
 import { ChatList } from './components/chat/ChatList';
@@ -22,6 +23,7 @@ export default function App() {
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>(null);
   const { toasts, toast, dismiss } = useToast();
+  const { theme, toggleTheme } = useTheme();
   const closePreview = useCallback(() => setPreviewDocument(null), []);
   const closeMobilePanel = useCallback(() => setMobilePanel(null), []);
 
@@ -120,7 +122,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-gray-50">
+    <div className="flex h-[100dvh] overflow-hidden bg-gray-50 dark:bg-gray-950">
       <DocumentList {...documentListProps} className="hidden lg:flex" />
 
       <ChatArea
@@ -133,6 +135,8 @@ export default function App() {
         onNewChat={createNewSession}
         onOpenDocs={() => setMobilePanel('docs')}
         onOpenChats={() => setMobilePanel('chats')}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       <ChatList

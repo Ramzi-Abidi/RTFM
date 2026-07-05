@@ -21,9 +21,10 @@ export function Toast({ id, title, description, variant = 'default', onClose }: 
       className={cn(
         'pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-lg border p-4 shadow-lg transition-all',
         {
-          'bg-white border-gray-200': variant === 'default',
-          'bg-green-50 border-green-200': variant === 'success',
-          'bg-red-50 border-red-200': variant === 'destructive',
+          'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800': variant === 'default',
+          'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800':
+            variant === 'success',
+          'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800': variant === 'destructive',
         },
       )}
     >
@@ -31,9 +32,9 @@ export function Toast({ id, title, description, variant = 'default', onClose }: 
         {title && (
           <p
             className={cn('text-sm font-semibold', {
-              'text-gray-900': variant === 'default',
-              'text-green-800': variant === 'success',
-              'text-red-800': variant === 'destructive',
+              'text-gray-900 dark:text-gray-100': variant === 'default',
+              'text-green-800 dark:text-green-200': variant === 'success',
+              'text-red-800 dark:text-red-200': variant === 'destructive',
             })}
           >
             {title}
@@ -42,9 +43,9 @@ export function Toast({ id, title, description, variant = 'default', onClose }: 
         {description && (
           <p
             className={cn('text-sm', {
-              'text-gray-600': variant === 'default',
-              'text-green-700': variant === 'success',
-              'text-red-700': variant === 'destructive',
+              'text-gray-600 dark:text-gray-300': variant === 'default',
+              'text-green-700 dark:text-green-300': variant === 'success',
+              'text-red-700 dark:text-red-300': variant === 'destructive',
             })}
           >
             {description}
@@ -54,9 +55,9 @@ export function Toast({ id, title, description, variant = 'default', onClose }: 
       <button
         onClick={() => onClose(id)}
         className={cn('rounded-md p-1 opacity-70 hover:opacity-100', {
-          'text-gray-500': variant === 'default',
-          'text-green-600': variant === 'success',
-          'text-red-600': variant === 'destructive',
+          'text-gray-500 dark:text-gray-400': variant === 'default',
+          'text-green-600 dark:text-green-400': variant === 'success',
+          'text-red-600 dark:text-red-400': variant === 'destructive',
         })}
       >
         <X size={16} />

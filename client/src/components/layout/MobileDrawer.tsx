@@ -17,19 +17,19 @@ export function MobileDrawer({ open, onClose, side, title, children }: MobileDra
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div
         className={cn(
-          'absolute inset-y-0 flex w-[min(20rem,85vw)] flex-col bg-white shadow-xl',
+          'absolute inset-y-0 flex w-[min(20rem,85vw)] flex-col bg-white dark:bg-gray-900 shadow-xl',
           side === 'left' ? 'left-0' : 'right-0',
         )}
         role="dialog"
         aria-modal="true"
         aria-label={title}
       >
-        <div className="flex items-center justify-between border-b border-gray-200 p-4">
-          <h2 className="font-semibold text-gray-700">{title}</h2>
+        <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 p-4">
+          <h2 className="font-semibold text-gray-700 dark:text-gray-200">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300"
             aria-label="Close panel"
           >
             <X size={20} />

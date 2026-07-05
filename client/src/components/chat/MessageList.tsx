@@ -20,7 +20,7 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
     <div className="flex-1 overflow-y-auto p-4 sm:p-6">
       {messages.length === 0 && !hasDocuments ? (
         <div className="h-full flex items-center justify-center">
-          <div className="text-center text-gray-400">
+          <div className="text-center text-gray-400 dark:text-gray-500">
             <FileText size={48} className="mx-auto mb-4" />
             <p>Upload your docs to get started</p>
           </div>
@@ -29,7 +29,7 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
 
       {messages.length === 0 && hasDocuments ? (
         <div className="h-full flex items-center justify-center">
-          <div className="text-center text-gray-400">
+          <div className="text-center text-gray-400 dark:text-gray-500">
             <p>Ask a question about your docs</p>
           </div>
         </div>
@@ -41,8 +41,8 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
         ))}
 
         {loading ? (
-          <div className="bg-white border border-gray-200 p-4 rounded-lg max-w-full sm:max-w-2xl">
-            <div className="flex items-center gap-2 text-gray-400">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-lg max-w-full sm:max-w-2xl">
+            <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
               <Loader2 size={16} className="animate-spin" />
               Thinking...
             </div>
