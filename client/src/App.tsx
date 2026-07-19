@@ -1,5 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ask, uploadDocs, listDocs, deleteDoc, Document, SessionMetadata } from './api/client';
+import {
+  askStream,
+  uploadDocs,
+  listDocs,
+  deleteDoc,
+  Document,
+  SessionMetadata,
+} from './api/client';
 import { Toaster } from '@/components/ui/toast';
 import { useToast } from '@/hooks/useToast';
 import { useSession, Message } from './hooks/useSession';
@@ -49,21 +56,50 @@ export default function App() {
 
     const question = input.trim();
     setInput('');
-    setMessages((prev) => [...prev, { role: 'user', content: question }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: question },
+      { role: 'assistant', content: '', sources: [] },
+    ]);
     setLoading(true);
 
     try {
-      const response = await ask(question, sessionId);
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: response.answer, sources: response.sources },
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' },
-      ]);
-      toast({ title: 'Error', description: 'Failed to get answer', variant: 'destructive' });
+      await askStream(question, sessionId, {
+        onSources: (sources) => {
+          setMessages((prev) => {
+            const next = [...prev];
+            const last = next[next.length - 1];
+            if (last?.role === 'assistant') {
+              next[next.length - 1] = { ...last, sources };
+            }
+            return next;
+          });
+        },
+        onToken: (token) => {
+          setMessages((prev) => {
+            const next = [...prev];
+            const last = next[next.length - 1];
+            if (last?.role === 'assistant') {
+              next[next.length - 1] = { ...last, content: last.content + token };
+            }
+            return next;
+          });
+        },
+      });
+    } catch (e) {
+      setMessages((prev) => {
+        const next = [...prev];
+        const last = next[next.length - 1];
+        if (last?.role === 'assistant' && !last.content) {
+          next.pop();
+        }
+        return next;
+      });
+      toast({
+        title: 'Error',
+        description: e instanceof Error ? e.message : 'Failed to get answer',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
