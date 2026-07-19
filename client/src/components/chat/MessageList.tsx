@@ -11,10 +11,13 @@ interface MessageListProps {
 
 export function MessageList({ messages, loading, hasDocuments }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastMessage = messages[messages.length - 1];
+  const isStreamingAssistant = lastMessage?.role === 'assistant';
+  const showStandaloneThinking = loading && !isStreamingAssistant;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, loading]);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6">
@@ -36,11 +39,30 @@ export function MessageList({ messages, loading, hasDocuments }: MessageListProp
       ) : null}
 
       <div className="space-y-4 max-w-3xl mx-auto">
-        {messages.map((msg, i) => (
-          <MessageBubble key={i} role={msg.role} content={msg.content} sources={msg.sources} />
-        ))}
+        {messages.map((msg, i) => {
+          const isPendingAssistant =
+            loading && i === messages.length - 1 && msg.role === 'assistant' && !msg.content;
 
-        {loading ? (
+          if (isPendingAssistant) {
+            return (
+              <div
+                key={i}
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-lg max-w-full sm:max-w-2xl"
+              >
+                <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
+                  <Loader2 size={16} className="animate-spin" />
+                  Thinking...
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <MessageBubble key={i} role={msg.role} content={msg.content} sources={msg.sources} />
+          );
+        })}
+
+        {showStandaloneThinking ? (
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-lg max-w-full sm:max-w-2xl">
             <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
               <Loader2 size={16} className="animate-spin" />

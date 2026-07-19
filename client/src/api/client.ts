@@ -43,6 +43,19 @@ export interface IngestResponse {
   totalChunks: number;
 }
 
+export type AskStreamEvent =
+  | { type: 'sources'; sources: Source[] }
+  | { type: 'token'; value: string }
+  | { type: 'done' }
+  | { type: 'error'; message: string };
+
+export interface AskStreamHandlers {
+  onSources?: (sources: Source[]) => void;
+  onToken?: (token: string) => void;
+  onDone?: () => void;
+  signal?: AbortSignal;
+}
+
 export async function ask(question: string, sessionId: string): Promise<AskResponse> {
   const res = await fetch(`${API_URL}/ask`, {
     method: 'POST',
@@ -51,6 +64,68 @@ export async function ask(question: string, sessionId: string): Promise<AskRespo
   });
   if (!res.ok) throw new Error('Failed to get answer');
   return res.json();
+}
+
+export async function askStream(
+  question: string,
+  sessionId: string,
+  handlers: AskStreamHandlers = {},
+): Promise<void> {
+  const res = await fetch(`${API_URL}/ask/stream`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, sessionId }),
+    signal: handlers.signal,
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to get answer');
+  }
+
+  if (!res.body) {
+    throw new Error('Streaming is not supported in this browser');
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('data:')) continue;
+
+      const payload = trimmed.slice(5).trim();
+      if (!payload) continue;
+
+      let event: AskStreamEvent;
+      try {
+        event = JSON.parse(payload) as AskStreamEvent;
+      } catch {
+        continue;
+      }
+
+      if (event.type === 'sources') {
+        handlers.onSources?.(event.sources);
+      } else if (event.type === 'token') {
+        handlers.onToken?.(event.value);
+      } else if (event.type === 'done') {
+        handlers.onDone?.();
+        return;
+      } else if (event.type === 'error') {
+        throw new Error(event.message);
+      }
+    }
+  }
+
+  handlers.onDone?.();
 }
 
 export async function uploadDocs(files: FileList): Promise<IngestResponse> {

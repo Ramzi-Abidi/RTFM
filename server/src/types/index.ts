@@ -30,6 +30,12 @@ export interface Source {
   score?: number;
 }
 
+export type AskStreamEvent =
+  | { type: 'sources'; sources: Source[] }
+  | { type: 'token'; value: string }
+  | { type: 'done' }
+  | { type: 'error'; message: string };
+
 export interface IngestResponse {
   success: boolean;
   files: { fileName: string; chunks: number }[];
