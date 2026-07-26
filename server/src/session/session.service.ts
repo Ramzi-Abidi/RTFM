@@ -115,6 +115,8 @@ export class SessionService {
    */
   async clearSession(sessionId: string) {
     const key = `session:${sessionId}`;
+    const metadataKey = `meta:${sessionId}`;
     await this.redisService.del(key);
+    await this.redisService.del(metadataKey);
   }
 }
