@@ -7,7 +7,6 @@ import {
   Document,
   SessionMetadata,
 } from './api/client';
-import { Toaster } from '@/components/ui/toast';
 import { useToast } from '@/hooks/useToast';
 import { useSession, Message } from './hooks/useSession';
 import { useTheme } from './hooks/useTheme';
@@ -29,7 +28,7 @@ export default function App() {
   const [showUpload, setShowUpload] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>(null);
-  const { toasts, toast, dismiss } = useToast();
+  const { toast } = useToast();
   const { theme, toggleTheme } = useTheme();
   const closePreview = useCallback(() => setPreviewDocument(null), []);
   const closeMobilePanel = useCallback(() => setMobilePanel(null), []);
@@ -215,9 +214,7 @@ export default function App() {
         onUpload={handleUpload}
       />
 
-      <DocumentPreviewModal document={previewDocument} onClose={closePreview} toast={toast} />
-
-      <Toaster toasts={toasts} onClose={dismiss} />
+      <DocumentPreviewModal document={previewDocument} onClose={closePreview} />
     </div>
   );
 }

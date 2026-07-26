@@ -3,19 +3,19 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Loader2, X } from 'lucide-react';
 import { Document, DocumentDetail, getDocument } from '../../api/client';
-import { ToastData } from '../../hooks/useToast';
+import { useToast } from '../../hooks/useToast';
 
 interface DocumentPreviewModalProps {
   document: Document | null;
   onClose: () => void;
-  toast: (options: Omit<ToastData, 'id'>) => void;
 }
 
 function isMarkdownFile(fileName: string) {
   return fileName.toLowerCase().endsWith('.md');
 }
 
-export function DocumentPreviewModal({ document, onClose, toast }: DocumentPreviewModalProps) {
+export function DocumentPreviewModal({ document, onClose }: DocumentPreviewModalProps) {
+  const { toast } = useToast();
   const [detail, setDetail] = useState<DocumentDetail | null>(null);
   const [loading, setLoading] = useState(false);
 
