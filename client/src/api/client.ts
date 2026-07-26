@@ -70,7 +70,7 @@ export async function askStream(
   question: string,
   sessionId: string,
   handlers: AskStreamHandlers = {},
-): Promise<void> {
+) {
   const res = await fetch(`${API_URL}/ask/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
