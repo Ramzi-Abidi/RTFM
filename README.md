@@ -10,6 +10,10 @@
 
 ---
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/9160c30a-000b-4c46-b6d5-11fadffb57c2" width="800" alt="image" />
+</p>
+
 ## Features
 
 - **RAG pipeline**: ingest `.md` / `.txt`, chunk, embed, retrieve top-k, answer with citations
