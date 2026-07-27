@@ -1,17 +1,25 @@
-# RTFM
+<p align="center">
+  <img src="client/public/logo.svg" width="120" alt="RTFM logo" />
+</p>
 
-An AI powered documentation assistant built with RAG (Retrieval Augmented Generation). Upload your documentation files, ask questions in natural language, and get accurate answers with source citations, powered entirely by free-tier APIs.
+<h1 align="center">RTFM - Read The F*ing Manual for me</h1>
+
+<p align="center">
+  An AI-powered documentation assistant built with RAG. Upload your docs, ask questions in natural language, get answers with source citations, powered entirely by free-tier APIs.
+</p>
+
+---
 
 ## Features
 
-- **RAG pipeline** — ingest `.md` / `.txt`, chunk, embed, retrieve top-k, answer with citations
-- **Semantic cache** — repeated / rephrased questions return instantly without hitting the LLM
-- **Session memory** — conversation history persisted in Redis (24h TTL) for follow-up questions
-- **Streaming answers** — token-by-token responses over Server-Sent Events (SSE)
-- **Document preview** — click a file in the sidebar to view its full content in a modal
-- **Dark mode** — class-based Tailwind theme, remembered across reloads
-- **Mobile responsive** — chat-centric layout with slide-over drawers for documents and chats
-- **Conversational routing** — greetings ("hi", "thanks") skip RAG and get a friendly reply
+- **RAG pipeline**: ingest `.md` / `.txt`, chunk, embed, retrieve top-k, answer with citations
+- **Semantic cache**: repeated / rephrased questions return instantly without hitting the LLM
+- **Session memory**: conversation history persisted in Redis (24h TTL) for follow-up questions
+- **Streaming answers**: token-by-token responses over Server-Sent Events (SSE)
+- **Document preview**: click a file in the sidebar to view its full content in a modal
+- **Dark mode**: class-based Tailwind theme, remembered across reloads
+- **Mobile responsive**: chat-centric layout with slide-over drawers for documents and chats
+- **Conversational routing**: greetings ("hi", "thanks") skip RAG and get a friendly reply
 
 ## Tech Stack
 

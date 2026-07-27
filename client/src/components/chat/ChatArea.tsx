@@ -1,6 +1,7 @@
 import { FileText, MessageSquare, MessageSquarePlus, Moon, Sun } from 'lucide-react';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
+import { Logo } from '../ui/Logo';
 import { Message } from '../../hooks/useSession';
 
 interface ChatAreaProps {
@@ -44,6 +45,7 @@ export function ChatArea({
           </button>
         ) : null}
 
+        <Logo size={26} />
         <h1 className="flex-1 truncate text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">
           RTFM For Me
         </h1>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="rtfm-book" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#4338ca"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 16 C 24 12 14 12 6 15 L 6 46 C 14 43 24 43 32 47 Z" fill="url(#rtfm-book)"/>
+  <path d="M32 16 C 40 12 50 12 58 15 L 58 46 C 50 43 40 43 32 47 Z" fill="#818cf8"/>
+  <path d="M32 16 L 32 47" stroke="#312e81" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M39 4 H 59 a5 5 0 0 1 5 5 V 19 a5 5 0 0 1 -5 5 H 47 L 40 30 L 42 24 H 39 a5 5 0 0 1 -5 -5 V 9 a5 5 0 0 1 5 -5 Z" fill="#ffffff" stroke="#4338ca" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="42" cy="14" r="2" fill="#4338ca"/>
+  <circle cx="48" cy="14" r="2" fill="#4338ca"/>
+  <circle cx="54" cy="14" r="2" fill="#4338ca"/>
+</svg>
