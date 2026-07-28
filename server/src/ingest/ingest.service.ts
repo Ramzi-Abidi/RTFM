@@ -37,6 +37,8 @@ export class IngestService {
       totalChunks += result.chunks;
     }
 
+    await this.vectorIndexService.clearCache();
+
     return {
       success: true,
       files: results,

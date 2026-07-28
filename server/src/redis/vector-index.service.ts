@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { RedisService } from './redis.service';
 import { DocumentChunk } from '../types';
 import { SchemaFieldTypes, VectorAlgorithms } from 'redis';
+import { createHash } from 'crypto';
 
 const EMBEDDING_DIM = 1024;
 const DOC_INDEX = 'idx:docs';
@@ -168,7 +169,7 @@ export class VectorIndexService implements OnModuleInit {
    * @param embedding - The question's embedding vector for similarity matching
    */
   async storeCache(question: string, answer: string, embedding: number[]) {
-    const id = Buffer.from(question).toString('base64').slice(0, 32);
+    const id = createHash('sha1').update(question).digest('hex').slice(0, 16);
     const key = `cache:${id}`;
     const embeddingBuffer = Buffer.from(new Float32Array(embedding).buffer);
 
@@ -180,12 +181,25 @@ export class VectorIndexService implements OnModuleInit {
   }
 
   /**
+   * Removes every entry from the semantic cache.
+   * Called whenever the underlying document corpus changes (ingest/delete)
+   * so cached answers can never reference chunks that no longer exist.
+   * @returns Number of cache entries removed
+   */
+  async clearCache(): Promise<number> {
+    const keys = await this.redisService.scanKeys('cache:*');
+    if (keys.length === 0) return 0;
+    await Promise.all(keys.map((k) => this.redisService.del(k)));
+    return keys.length;
+  }
+
+  /**
    * Deletes all chunks associated with a document from Redis.
    * @param fileId - The hash ID of the document
    * @returns Number of chunks deleted
    */
   async deleteDocChunks(fileId: string) {
-    const keys = await this.redisService.keys(`doc:${fileId}:*`);
+    const keys = await this.redisService.scanKeys(`doc:${fileId}:*`);
     let deleted = 0;
     for (const key of keys) {
       await this.redisService.del(key);
@@ -195,6 +209,6 @@ export class VectorIndexService implements OnModuleInit {
   }
 
   async getDocumentChunks(_fileName: string) {
-    return this.redisService.keys(`doc:*`);
+    return this.redisService.scanKeys(`doc:*`);
   }
 }

@@ -1,19 +1,20 @@
 import { Controller, Post, Body, Res, Req } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AskService } from './ask.service';
-import { AskRequest, AskResponse } from '../types';
+import { AskDto } from './dto/ask.dto';
+import { AskResponse } from '../types';
 
 @Controller('ask')
 export class AskController {
   constructor(private readonly askService: AskService) {}
 
   @Post()
-  async ask(@Body() body: AskRequest): Promise<AskResponse> {
+  async ask(@Body() body: AskDto): Promise<AskResponse> {
     return this.askService.ask(body.question, body.sessionId);
   }
 
   @Post('stream')
-  async stream(@Body() body: AskRequest, @Req() req: Request, @Res() res: Response) {
+  async stream(@Body() body: AskDto, @Req() req: Request, @Res() res: Response) {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
