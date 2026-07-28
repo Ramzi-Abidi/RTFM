@@ -61,9 +61,8 @@ export class SessionService {
    * @returns Array of session metadata sorted by creation date (newest first)
    */
   async listSessions(): Promise<SessionMetadata[]> {
-    const pattern = 'session:*';
     const client = this.redisService.getClient();
-    const keys = await client.keys(pattern);
+    const keys = await this.redisService.scanKeys('session:*');
 
     const sessions = await Promise.all(
       keys.map(async (key) => {

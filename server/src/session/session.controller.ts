@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { SessionService, SessionMetadata, SessionMessage } from './session.service';
 
 @Controller('sessions')
@@ -18,7 +18,9 @@ export class SessionController {
    * Loads full conversation history for a specific session
    */
   @Get(':id')
-  async load(@Param('id') id: string): Promise<{ messages: SessionMessage[] }> {
+  async load(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<{ messages: SessionMessage[] }> {
     const messages = await this.sessionService.loadSession(id);
     return { messages };
   }
@@ -27,7 +29,7 @@ export class SessionController {
    * Deletes a session and all its messages
    */
   @Delete(':id')
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id', new ParseUUIDPipe()) id: string) {
     await this.sessionService.clearSession(id);
     return { success: true };
   }

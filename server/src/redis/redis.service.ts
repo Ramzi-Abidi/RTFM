@@ -43,8 +43,19 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return this.client.del(key);
   }
 
-  async keys(pattern: string) {
-    return this.client.keys(pattern);
+  /**
+   * Non-blocking replacement for `KEYS`. Iterates the keyspace via `SCAN`,
+   * letting Redis process other commands between batches.
+   * @param pattern - Glob-style pattern (e.g. `session:*`).
+   * @param count - Advisory batch size hint sent to Redis (default 100).
+   * @returns All matching keys collected across the scan.
+   */
+  async scanKeys(pattern: string, count = 100): Promise<string[]> {
+    const keys: string[] = [];
+    for await (const key of this.client.scanIterator({ MATCH: pattern, COUNT: count })) {
+      keys.push(key);
+    }
+    return keys;
   }
 
   async exists(key: string) {

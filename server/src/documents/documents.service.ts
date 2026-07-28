@@ -27,7 +27,7 @@ export class DocumentsService {
    * @returns Object containing array of documents with id, fileName, and chunk count
    */
   async listDocuments(): Promise<{ documents: DocumentInfo[] }> {
-    const keys = await this.redisService.keys('file:*');
+    const keys = await this.redisService.scanKeys('file:*');
     const documents: DocumentInfo[] = [];
 
     for (const key of keys) {
@@ -86,6 +86,8 @@ export class DocumentsService {
 
     await this.vectorIndexService.deleteDocChunks(fileId);
     await this.redisService.del(fileKey);
+    // because cached answers may reference a deleted doc.
+    await this.vectorIndexService.clearCache();
 
     return { success: true, deleted: data.fileName };
   }
