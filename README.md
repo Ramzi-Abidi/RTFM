@@ -2,7 +2,7 @@
   <img src="client/public/logo.svg" width="120" alt="RTFM logo" />
 </p>
 
-<h1 align="center">RTFM - Read The F*ing Manual for me</h1>
+<h1 align="center">RTFM - Read The Manual for me</h1>
 
 <p align="center">
   An AI-powered documentation assistant built with RAG. Upload your docs, ask questions in natural language, get answers with source citations, powered entirely by free-tier APIs.
