@@ -27,14 +27,14 @@
 
 ## Tech Stack
 
-| Layer                           | Technology                                                        |
-| ------------------------------- | ----------------------------------------------------------------- |
-| **Backend**                     | NestJS (TypeScript)                                               |
-| **Frontend**                    | React + Vite + TailwindCSS                                        |
-| **Vector DB / Cache / Storage** | Redis Stack                                                       |
-| **LLM**                         | Groq (`llama-3.3-70b-versatile`) with Google AI (Gemini) fallback |
-| **Embeddings**                  | Jina AI (`jina-embeddings-v3`, 1024 dimensions)                   |
-| **Package Manager**             | pnpm                                                              |
+| Layer                           | Technology                                                   |
+| ------------------------------- | ------------------------------------------------------------ |
+| **Backend**                     | NestJS (TypeScript)                                          |
+| **Frontend**                    | React + Vite + TailwindCSS                                   |
+| **Vector DB / Cache / Storage** | Redis Stack                                                  |
+| **LLM**                         | Groq (`openai/gpt-oss-20b`) with Google AI (Gemini) fallback |
+| **Embeddings**                  | Jina AI (`jina-embeddings-v3`, 1024 dimensions)              |
+| **Package Manager**             | pnpm                                                         |
 
 ## How It Works
 

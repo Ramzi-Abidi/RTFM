@@ -5,12 +5,14 @@ import Groq from 'groq-sdk';
 @Injectable()
 export class LlmService {
   private groq: Groq;
+  private groqModel: string;
   private googleApiKey: string;
 
   constructor(private configService: ConfigService) {
     this.groq = new Groq({
       apiKey: this.configService.get<string>('GROQ_API_KEY') || '',
     });
+    this.groqModel = this.configService.get<string>('GROQ_MODEL') || 'openai/gpt-oss-20b';
     this.googleApiKey = this.configService.get<string>('GOOGLE_AI_API_KEY') || '';
   }
 
@@ -63,7 +65,7 @@ export class LlmService {
 
   private async completeWithGroq(prompt: string) {
     const response = await this.groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: this.groqModel,
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 2048,
       temperature: 0.7,
@@ -73,7 +75,7 @@ export class LlmService {
 
   private async *completeStreamWithGroq(prompt: string): AsyncGenerator<string> {
     const stream = await this.groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: this.groqModel,
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 2048,
       temperature: 0.7,
